@@ -1,0 +1,6 @@
+#! /bin/sh
+
+./configure \
+	--enable-softkbd240320 \
+    --enable-tooltip \
+    $*

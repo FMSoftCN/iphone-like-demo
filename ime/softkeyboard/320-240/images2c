@@ -1,0 +1,54 @@
+#!/bin/sh
+#recursively removing .svn folders from current directory
+
+
+images2c () 
+{
+echo "convert png file to .c"
+for i in *.png
+do
+    IMAGENAME=$i
+    ICIMAGENAME=${IMAGENAME%.*}
+    ICIMAGENAME=$ICIMAGENAME".c" 
+    echo $IMAGENAME
+    echo $ICIMAGENAME
+    ./bin2c $IMAGENAME > $ICIMAGENAME
+done
+
+}
+
+getimagenamelist()
+{
+#for i in *.ico
+for i in `cat imagefilelist.txt`
+do
+    IMAGENAME=$i
+    VARNAME=${IMAGENAME%.*}
+
+    FILE='"'$i'"'","
+    echo $FILE
+done
+}
+
+getimagedatalist()
+{
+for i in `cat imagefilelist.txt`
+do
+    IMAGENAME=$i
+    FILE='"'$i'"'
+    VARNAME=${IMAGENAME%.*}
+
+    FILE="{"'"'$i'"'", (unsinged char*)"$VARNAME"_data, sizeof("$VARNAME"_data)},"
+    echo $FILE
+done
+
+}
+
+usage ()
+{
+    echo "usage: res-tool [0|1|2]"
+}
+
+images2c
+
+

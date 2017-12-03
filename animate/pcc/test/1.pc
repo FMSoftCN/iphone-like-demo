@@ -1,0 +1,12 @@
+declear native method
+	get_int_value : 0
+	print_int_value : 1
+end
+
+method main
+	ncall get_int_value
+	ncall get_int_value
+	iadd
+	ncall print_int_value
+end
+

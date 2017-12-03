@@ -1,0 +1,40 @@
+#!/bin/bash
+
+rm config.cache config.status -f
+
+PREFIX=/usr/local/arm/3.3.2
+
+#ATTENTION the Order is important, we always hope the compiler find the head file or libraries in ${TARGET_DIR} firtly, if cannot, 
+# then, find them in ${CROSS_ENV}, so, the ${TARGET_DIR} must be set in the front of the ${CROSS_ENV}
+CROSS_CFLAGS="-I${PREFIX}/include -I${PREFIX}/arm-linux/sys-include"
+CROSS_LDFLAGS="-L${PREFIX}/lib"
+
+CC=arm-linux-gcc \
+LD=arm-linux-ld \
+AS=arm-linux-as \
+AR=arm-linux-ar \
+CFLAGS="-D_TARGET_IPAQ -O2 $CROSS_CFLAGS" \
+CPPFLAGS=$CROSS_CFLAGS \
+LDFLAGS=$CROSS_LDFLAGS \
+./configure --prefix=${PREFIX} \
+    --build=i386-linux \
+    --host=arm-unknown-linux \
+    --target=arm-unknown-linux \
+    --disable-static \
+    --enable-procs \
+    --enable-incoreres \
+    --enable-flatlf \
+    --enable-skinlf \
+    --enable-upfsupport \
+    --enable-vbfsupport \
+    --enable-bmpfsupport \
+    --enable-ipaqh5400ial \
+    --disable-micemoveable \
+    --disable-qpfsupport \
+    --disable-cursor \
+    --disable-qvfbial \
+    --disable-consoleial \
+    --disable-savescreen \
+    --disable-videoqvfb \
+    --enable-miniguientry \
+    --disable-pcxvfb

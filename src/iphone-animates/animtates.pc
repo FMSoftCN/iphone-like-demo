@@ -1,0 +1,61 @@
+declear ins
+	setLocation
+	setSize
+	setAlpha
+	setImg
+	setVisible
+	moveTo
+	scaleTo
+	alphaTo
+	run
+	wait
+	loop
+end
+
+declear native method
+	change_objs_swing:1
+	clear_topmost:0	
+	clear_moveicons_timeline:0
+end
+
+; swing all objs
+method swingAll:ani_sence
+
+NEXT:
+	iload ani_sence
+	ncall change_objs_swing
+	pop
+	iconst 1
+	run
+	intr
+	jmp NEXT
+end
+
+; method release Drag icon
+method releaseDragIcon:ani, x, y, w, h
+	iload ani
+	iload x
+	iload y
+	iconst 3
+	moveTo
+
+	iload ani
+	iload w
+	iload h
+	iconst 3
+	scaleTo
+
+	iload ani
+	iconst 255
+	iconst 3
+	alphaTo
+
+	iconst 3
+	run
+
+	intr
+
+	ncall clear_topmost
+end
+
+

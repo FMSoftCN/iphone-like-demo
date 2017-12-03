@@ -1,0 +1,30 @@
+
+; this is the template of p-code source
+
+declear ins
+	setLocation
+	setSize
+	setMoveTo
+	...
+end
+
+declear method
+	method_name, argc
+	...
+end
+
+declear native method
+	method_name: argc
+	....
+end
+
+method method_name: [argc]
+	var v1, v2, v3, ...
+	var v1, v2, v3, ..
+
+	....
+LABLE:
+	....
+
+end
+

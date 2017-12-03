@@ -1,0 +1,40 @@
+#!/bin/bash
+
+export PATH=/usr/local/arm/3.3.2/bin:$PATH
+
+echo Copy libraries for demo
+
+for i in libminigui_procs-3.0.so.1 libanimate.so.0 libsoftkeywin.so.0 libcommon_animates.so.0 libjpeg.so.62 libpng.so.2; do
+    rm /media/disk/iphone-like-demo-iPAQ/lib/${i}*
+    arm-linux-strip lib/${i} 
+    cp lib/${i} /media/disk/iphone-like-demo-iPAQ/lib/;
+done
+
+echo copy executables and resources ...
+bins="calculator memo picture watch_srv calendar mginit sysmain worm housekeeper
+others watch wt_forecast"
+
+for i in $bins; do
+    arm-linux-strip bin/arm-linux-gnu-$i
+    cp bin/arm-linux-gnu-$i /media/disk/iphone-like-demo-iPAQ/bin/$i -p;
+done
+
+cp bin/*.pcc /media/disk/iphone-like-demo-iPAQ/bin/
+cp bin/*.etc /media/disk/iphone-like-demo-iPAQ/bin/
+cp bin/res /media/disk/iphone-like-demo-iPAQ/bin/ -r
+cp bin/view /media/disk/iphone-like-demo-iPAQ/bin/ -r
+
+echo copy libraries for mDolphin
+for i in libmdolphin.so.0 libxml2.so.2 libcurl.so.4; do
+    arm-linux-strip lib/$i
+    cp lib/$i /media/disk/iphone-like-demo-iPAQ/lib/;
+done
+
+echo copy mDolphin
+arm-linux-strip bin/mdolphin_app; 
+cp bin/mdolphin_app /media/disk/iphone-like-demo-iPAQ/bin/browser
+
+echo umount..., please wait for flush.
+umount /media/disk
+echo done.
+

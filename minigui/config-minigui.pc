@@ -1,0 +1,14 @@
+#!/bin/bash
+
+./configure \
+    --disable-static \
+    --enable-procs \
+    --enable-incoreres \
+    --enable-upfsupport \
+    --enable-ft2support \
+    --enable-autoial \
+    --enable-randomial \
+    --disable-micemoveable \
+    --disable-qpfsupport \
+    --enable-miniguientry \
+    $*

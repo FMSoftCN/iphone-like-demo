@@ -1,0 +1,28 @@
+*******************************************************************************
+What's new in this version (2008/11/01 ~ 2008/12/03)
+
+12/25. MODIFY #? SecondaryDC's update_sec() callback changed.
+	* src/systemsetting/sysmain.c
+	* src/agg/agg_flip.c
+
+12/04. BUGFIXING #? 
+	* src/meme/mem.c
+	* ime/tooltip.c
+	* animate/animate_sence.c
+
+12/02. BUGFIXING #?: MiniGUI have Restore the old erasebkgnd machine; MiniGUI has 
+append GetSecondaryClientDC/ReleaseSecondaryDC API, so change the process of
+MSG_ERASEBKGND msg.
+	* src/meme/mem.c
+	* src/systemsetting/sysmain.c
+	* src/systemsetting/localnetwork/netcardset.c
+	* src/systemsetting/render/render.c
+	* src/systemsetting/wifisetting/*.c
+	* src/watch/watch.c
+	* src/others/others.c
+	* src/ebctrl/eblistview.c
+	* src/weatherforecaset/weatherforecast.c
+
+2008/04/25: add a new key in iphone-like-demo.etc: switchkey, and add the
+support code in InitSence function. The switchkey handle a value when
+application switched to desktop. by dongjunjie
