@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.61)
-AC_INIT(iphone-like-demo, 1.2.0)
+AC_INIT(iphone-like-demo, 1.0.1)
 AC_CONFIG_SRCDIR(src/mginit.c)
 
 dnl needed for cross-compiling
