@@ -1,4 +1,6 @@
-INCLUDES = -I../ -I../../ -I../ebctrl -I../../include -I../../animate -I../../ime -I./../agg/
+AUTOMAKE_OPTIONS=subdir-objects
+
+AM_CPPFLAGS = -I../ -I../../ -I../ebctrl -I../../include -I../../animate -I../../ime -I./../agg/
 
 bin_PROGRAMS=memo
 

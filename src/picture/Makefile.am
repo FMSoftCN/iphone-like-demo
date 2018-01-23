@@ -1,4 +1,6 @@
-INCLUDES = -I../ -I../../include -I../../animate -I../../animate -I./../agg/
+AUTOMAKE_OPTIONS=subdir-objects
+
+AM_CPPFLAGS = -I../ -I../../include -I../../animate -I../../animate -I./../agg/
 
 bin_PROGRAMS = picture
 

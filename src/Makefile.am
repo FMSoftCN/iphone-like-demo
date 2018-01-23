@@ -1,5 +1,6 @@
 TOP_DIR=..
-INCLUDES = -I. -I../include -I.. -I../ime/
+AM_CPPFLAGS = -I. -I../include -I.. -I../ime/
+
 LIBS+=-lanimate -lcommon_animates -lsoftkeywin -lminigui_procs
 
 bin_PROGRAMS = mginit

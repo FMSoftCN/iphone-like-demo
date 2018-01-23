@@ -1,4 +1,6 @@
-INCLUDES = -I../ -I../../include
+AUTOMAKE_OPTIONS=subdir-objects
+
+AM_CPPFLAGS = -I../ -I../../include
 
 bin_PROGRAMS = watch
 

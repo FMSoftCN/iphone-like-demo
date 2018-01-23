@@ -1,4 +1,6 @@
-INCLUDES = -I../ -I../../ -I./../ebctrl/ -I./../ex_wifi/ -I../../include -I../../animate/
+AUTOMAKE_OPTIONS=subdir-objects
+
+AM_CPPFLAGS = -I../ -I../../ -I./../ebctrl/ -I./../ex_wifi/ -I../../include -I../../animate/
 
 bin_PROGRAMS=sysmain
 sysmain_LDADD= ./../ebctrl/libebctrl.a ./../ex_wifi/libex_wifi.a ./../agg/.libs/libagg.a ./../../animate/common_animates/.libs/libcommon_animates.a ./../../animate/.libs/libanimate.a -lstdc++

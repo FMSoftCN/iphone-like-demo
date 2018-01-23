@@ -1,6 +1,4 @@
-INCLUDES= -I. -I.. -I../../include
-
-TOP_DIR=../
+AM_CPPFLAGS= -I. -I.. -I../../include
 
 noinst_LTLIBRARIES = libiphoneanimate.la
 

@@ -1,4 +1,4 @@
-INCLUDES = -I.. -I../.. -I../../include
+AM_CPPFLAGS = -I.. -I../.. -I../../include
 
 bin_PROGRAMS=watch_srv
 

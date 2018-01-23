@@ -1,7 +1,9 @@
-TOP_DIR=..
-INCLUDES=-I../include -I../animate
-LIBS=-lanimate -lcommon_animates
+AUTOMAKE_OPTIONS = subdir-objects
 
+TOP_DIR=..
+AM_CPPFLAGS=-I../include -I../animate
+
+LIBS=-lanimate -lcommon_animates
 lib_LTLIBRARIES = libsoftkeywin.la
 
 libsoftkeywin_la_SOURCES= softkeywindow.c tooltip.c softkeywindow.h tooltip.h \

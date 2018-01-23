@@ -1,7 +1,3 @@
-TOP_DIR=..
-INCLUDES = 
-SUBDIRS=
-
 lib_LTLIBRARIES = libagg.la
 
 SRC_FILES = agg_flip.cpp  \

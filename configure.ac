@@ -1,9 +1,8 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
-
 AC_PREREQ(2.61)
-
-AC_INIT(src/mginit.c)
+AC_INIT(iphone-like-demo, 1.2.0)
+AC_CONFIG_SRCDIR(src/mginit.c)
 
 dnl needed for cross-compiling
 AC_CANONICAL_SYSTEM
@@ -18,8 +17,7 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 
-AM_INIT_AUTOMAKE(iphone-like-demo,1.0.0,-)
-
+AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h) 
 
 #user define macores

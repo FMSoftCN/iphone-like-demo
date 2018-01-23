@@ -1,4 +1,6 @@
-INCLUDES = -I ../ -I ../../
+AUTOMAKE_OPTIONS=subdir-objects
+
+AM_CPPFLAGS = -I ../ -I ../../
 
 bin_PROGRAMS = housekeeper
 
