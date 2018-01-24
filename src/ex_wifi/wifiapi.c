@@ -109,7 +109,7 @@ int wifi_get_wireless_interface_name (char* name, int* number)
    ifr = ifc.ifc_req;
    *number = 0;
    name[0] = '\0';
-   printf ("WiFi ifc.ifc_len / sizeof (struct ifreq) %ld\n", ifc.ifc_len / sizeof (struct ifreq));
+   printf ("WiFi ifc.ifc_len / sizeof (struct ifreq) %d\n", ifc.ifc_len / sizeof (struct ifreq));
    
    for (i = ifc.ifc_len / sizeof (struct ifreq); --i >= 0; ifr++)
    {

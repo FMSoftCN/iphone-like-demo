@@ -8,7 +8,7 @@ bin_PROGRAMS = mginit
 datadir=$(prefix)/bin
 data_DATA=iphone-like-demo.etc animates.pcc
 
-SUBDIRS = agg calculator picture watch others ebctrl memo snake boxy weatherforecast iphone-animates calendar scrnsaver systemsetting res ex_wifi 
+SUBDIRS = agg calculator picture watch others ebctrl memo snake boxy weatherforecast iphone-animates calendar scrnsaver ex_wifi systemsetting res  
 
 mginit_SOURCES= \
 		dragmanager.c icon_layout.c desktop-layout.c layout.c \
