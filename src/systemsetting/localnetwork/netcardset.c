@@ -64,7 +64,6 @@ static HDC g_hdcBKG;
 static BITMAP g_DHCPBitmap;
 static BITMAP g_STATICBitmap;
 
-static PLOGFONT netcard_font;
 static NetcardParam ipparam_test[2] ={
     {TYPE_DHCP,"  0.  0.  0.  0","  0.  0.  0.  0","  0.  0.  0.  0","  0.  0.  0.  0"},
     {TYPE_DHCP,"  0.  0.  0.  0","  0.  0.  0.  0","  0.  0.  0.  0","  0.  0.  0.  0"},
@@ -74,14 +73,14 @@ static BITMAP bg_bmp, bar_bmp, bootp_bmp,list_bmp;
 static BITMAP nc_ok_bmp,nc_cancel_bmp,nc_fgn,nc_ipaddr,nc_dns,nc_submask,nc_gateway,nc_domain,nc_clientid;
 
 
-static void IpparamToString (unsigned char *ipparam, char *ipparam_str)
+static void IpparamToString (char *ipparam, char *ipparam_str)
 {
    // char param0, param1, param2, param3;
   //  char str0[4], str1[4], str2[4], str3[4];
-    unsigned char tmpstr[20] = {0};
-    unsigned char str_len = 0;
+    char tmpstr[20] = {0};
 
-    sprintf (tmpstr, "%3d.%3d.%3d.%3d", (int)ipparam[0], (int)ipparam[1], (int)ipparam[2], (int)ipparam[3]);
+    sprintf (tmpstr, "%3d.%3d.%3d.%3d", 
+        (int)ipparam[0], (int)ipparam[1], (int)ipparam[2], (int)ipparam[3]);
     memcpy(ipparam_str, tmpstr, sizeof(tmpstr)); 
 }
 
@@ -107,14 +106,13 @@ static BOOL GetNetcardParam (void)
     char netname[32] = {0};
     char dns[256] ;
     char gateway[6],submask[6], ipaddr[6], search[32];
-    int i,count,net_num,dns_num, dom_num;
-    int temp1,temp2;
+    int i,count,dns_num, dom_num;
     BOOL success = TRUE;
 
     memset(&g_netcard_ip_param, 0x0, sizeof(NetcardParam));
     g_netcard_ip_param.cur_ip_type = TYPE_STATIC;
     
-    net_num = 0;
+    //net_num = 0;
     // memset(search, 0x0, sizeof(search));
     memset(dns, 0x0, 256);//sizeof(dns));
     // memset(submask, 0x0, sizeof(submask));
@@ -184,13 +182,12 @@ static BOOL GetNetcardParam (void)
 #endif
 }
 
+void wifi_set_search(char *search);
+
 static BOOL  SetNetcardParam(HWND hwnd, int cur_ip_type)//, char *netname)
 {
-    char netname[32],ipaddr[20],submask[20],dns[40],getway[20],search[20],mp[20];
-    int i,j,k;
+    char netname[32],ipaddr[20],submask[20],dns[40],getway[20],search[20];
     
-    j = 0;
-    k = 0;
     GetWindowText(GetDlgItem(hwnd, IDC_SLEDIT_NETCARD_IPADDR), ipaddr, sizeof(ipaddr));
     GetWindowText(GetDlgItem(hwnd, IDC_SLEDIT_NETCARD_SUBM), submask, sizeof(submask));
     GetWindowText(GetDlgItem(hwnd, IDC_SLEDIT_NETCARD_GATEWAY), getway, sizeof(getway));
@@ -198,12 +195,6 @@ static BOOL  SetNetcardParam(HWND hwnd, int cur_ip_type)//, char *netname)
     memcpy(g_netcard_ip_param.ipaddr, ipaddr, strlen(ipaddr));
     memcpy(g_netcard_ip_param.submask, submask, strlen(submask));
  
-   /* while(dns[j] != '\n')
-    {
-        if(dns[j] == ';')
-             tmp[k++] = '\n';
-         tmp[k++] = dns[j++];
-     }*/
     memcpy(g_netcard_ip_param.dns, dns, strlen(dns));
     g_netcard_ip_param.cur_ip_type = cur_ip_type;
 
@@ -242,12 +233,6 @@ static void SetStaticIpparam (HWND hwnd)//, NetcardParam *ip_param)
     SendMessage(GetDlgItem(hwnd, IDC_SLEDIT_NETCARD_GATEWAY), MSG_SETTEXT, 0, (DWORD)(&(g_static_param.gateway[0])));
     SendMessage(GetDlgItem(hwnd, IDC_SLEDIT_NETCARD_DOM), MSG_SETTEXT, 0, (DWORD)(&(g_static_param.domain[0])));
     SendMessage(GetDlgItem(hwnd, IDC_SLEDIT_NETCARD_CID), MSG_SETTEXT, 0, (DWORD)(&(g_static_param.cid[0])));
-}
-
-static void GetStaticIpparam (HWND hwnd)
-{
-
-
 }
 
 static void InitNetcardBitmap(void)
@@ -289,19 +274,16 @@ static void UnloadResource (void)
 }
 
 
-static int NetcardWinProc(HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
+static LRESULT NetcardWinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    HWND okbtnwnd, cancelbtnwnd, dhcpwnd, bootpwnd, statwnd;
     HWND ipeditwnd, subeditwnd,gweditwnd,dnseditwnd,dmeditwnd, cideditwnd;
     HWND ipstawnd,  substawnd, gwstawnd, dnsstawnd, dmstawnd, cidstawnd;
-    char netname[20];
     static int cur_type;
     
     switch (message)
     {
      case MSG_CREATE:
          {
-             HDC hdc;
              BOOL bRet = FALSE;
              bRet = GetNetcardParam ();
              if (!bRet)
@@ -310,14 +292,14 @@ static int NetcardWinProc(HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
              }
              cur_type = g_netcard_ip_param.cur_ip_type;
                
-             cancelbtnwnd = CreateWindow (MGD_BUTTON,"cacel",
+             CreateWindow (MGD_BUTTON,"cacel",
                      WS_VISIBLE,
                      IDC_BTN_NETCARD_CANCEL,
                      4, 6, 42, 21,
                      hwnd, 
                      (DWORD)(&nc_cancel_bmp));
 
-             okbtnwnd = CreateWindow (MGD_BUTTON, "ok",
+             CreateWindow (MGD_BUTTON, "ok",
                      WS_VISIBLE,// | BS_DEFPUSHBUTTON,
                      IDC_BTN_NETCARD_OK,
                      196, 6, 40, 21,
@@ -325,23 +307,23 @@ static int NetcardWinProc(HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
                      (DWORD)&nc_ok_bmp); 
              if(cur_type == TYPE_DHCP)
              {
-                 dhcpwnd = CreateWindow ("MGD_BUTTON", "",
+                 CreateWindow ("MGD_BUTTON", "",
                      WS_CHILD | WS_VISIBLE | MGDBUTTON_2STATE | MGDBUTTON_ANTISTATE,
                      IDC_BTN_NETCARD_DHCP,
                      3, 87, 78, 30,
                      hwnd, (DWORD)(&g_DHCPBitmap));
-                 statwnd = CreateWindow ("MGD_BUTTON", "",
+                 CreateWindow ("MGD_BUTTON", "",
                      WS_CHILD | WS_VISIBLE | MGDBUTTON_2STATE,
                      IDC_BTN_NETCARD_STATIC,               
                      160, 87, 77, 30,
                      hwnd, (DWORD)(&g_STATICBitmap));
              }else if(cur_type == TYPE_STATIC){
-               dhcpwnd = CreateWindow ("MGD_BUTTON", "",
+               CreateWindow ("MGD_BUTTON", "",
                      WS_CHILD | WS_VISIBLE | MGDBUTTON_2STATE,
                      IDC_BTN_NETCARD_DHCP,
                      3, 87, 78, 30,
                      hwnd, (DWORD)(&g_DHCPBitmap));
-               statwnd = CreateWindow ("MGD_BUTTON", "",
+               CreateWindow ("MGD_BUTTON", "",
                      WS_CHILD | WS_VISIBLE | MGDBUTTON_2STATE | MGDBUTTON_ANTISTATE,
                      IDC_BTN_NETCARD_STATIC,               
                      160, 87, 77, 30,
@@ -349,7 +331,7 @@ static int NetcardWinProc(HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
                  
              
              }
-             bootpwnd = CreateWindow ("MGD_BUTTON", "",
+             CreateWindow ("MGD_BUTTON", "",
                      WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
                      IDC_BTN_NETCARD_BOOTP,
                      81, 87, 79, 30,

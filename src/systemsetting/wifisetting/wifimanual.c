@@ -27,7 +27,9 @@ static BITMAP g_stWiFiManualCancel;
 static BITMAP g_stWiFiManualDone;
 static char* exec;
 
-static int WiFiManualProc (HWND hWnd, int nMessage, WPARAM wParam, LPARAM lParam)
+void ShowRollAnimate (BOOL);
+
+static LRESULT WiFiManualProc (HWND hWnd, UINT nMessage, WPARAM wParam, LPARAM lParam)
 {
     switch (nMessage)
     {
@@ -103,9 +105,10 @@ static int WiFiManualProc (HWND hWnd, int nMessage, WPARAM wParam, LPARAM lParam
                             memset (buffpwd, 0x0, sizeof (buffpwd));
                             GetWindowText(GetDlgItem(hWnd, IDC_MANWIFI_ESSID), buffessid, sizeof(buffessid));         
                             GetWindowText(GetDlgItem(hWnd, IDC_MANWIFI_KEY), buffpwd, sizeof(buffpwd));         
-                            asprintf (&exec, "iwconfig wlan0 essid %s key %s", buffessid, buffpwd); 
-                            system (exec);
-                            free (exec);
+                            if (asprintf (&exec, "iwconfig wlan0 essid %s key %s", buffessid, buffpwd) >= 0) {
+                                // system (exec);
+                                free (exec);
+                            }
                             ShowRollAnimate (TRUE);
                             sleep (6);
                             ShowRollAnimate (FALSE);

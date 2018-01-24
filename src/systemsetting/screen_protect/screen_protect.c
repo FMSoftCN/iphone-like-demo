@@ -60,7 +60,7 @@ static CTRLDATA ScreenSaverControl[]=
 };
 #endif
 
-static int ScreenSaverProc (HWND hWnd, int nMessage, WPARAM wParam, LPARAM lParam)
+static LRESULT ScreenSaverProc (HWND hWnd, UINT nMessage, WPARAM wParam, LPARAM lParam)
 {
 
     switch (nMessage)
@@ -127,7 +127,6 @@ static int ScreenSaverProc (HWND hWnd, int nMessage, WPARAM wParam, LPARAM lPara
 
           if (nCurr != g_nSetZone)
           {
-              HDC hdc;
               RECT rcTime;
               rcTime.left = 140;
               rcTime.top = 65;

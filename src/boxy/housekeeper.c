@@ -26,7 +26,7 @@
 static HWND hMainWnd=HWND_INVALID;
 ptagLevelCollection pTempColl;
 
-static int HousekeeperProc ( HWND hWnd, int message, WPARAM wParam, LPARAM lParam );
+static LRESULT HousekeeperProc ( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
 static void UpdateHighScore ( int ScoreNumber );
 static void _housekeeper_init_create_info ( PMAINWINCREATE pCreateInfo );
 
@@ -298,10 +298,10 @@ static void Housekeeper_Unregister( HWND hWnd )
 }
 
 
-static int HousekeeperProc ( HWND hWnd, int message, WPARAM wParam, LPARAM lParam )
+static LRESULT HousekeeperProc ( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
     HDC hdc;
-    char st[6][20];
+    char st[6][101];
     char str[100];
     FILE *stream;
     int iDir = 0;
@@ -321,16 +321,16 @@ static int HousekeeperProc ( HWND hWnd, int message, WPARAM wParam, LPARAM lPara
             }
             else
             {
-                fgets ( st[0], 100, stream );
-                HighScore[0] = strtol ( st[0], NULL, 10 );
-                fgets ( st[1], 100, stream );
-                HighScore[1] = strtol ( st[1], NULL, 10 );
-                fgets ( st[2], 100, stream );
-                HighScore[2] = strtol ( st[2], NULL, 10 );
-                fgets ( st[3], 100, stream );
-                HighScore[3] = strtol ( st[3], NULL, 10 );
-                fgets ( st[4], 100, stream );
-                HighScore[4] = strtol ( st[4], NULL, 10 );
+                if (fgets ( st[0], 100, stream ))
+                    HighScore[0] = strtol ( st[0], NULL, 10 );
+                if (fgets ( st[1], 100, stream ))
+                    HighScore[1] = strtol ( st[1], NULL, 10 );
+                if (fgets ( st[2], 100, stream ))
+                    HighScore[2] = strtol ( st[2], NULL, 10 );
+                if (fgets ( st[3], 100, stream ))
+                    HighScore[3] = strtol ( st[3], NULL, 10 );
+                if (fgets ( st[4], 100, stream ))
+                    HighScore[4] = strtol ( st[4], NULL, 10 );
                 fclose ( stream );
             }
             break;

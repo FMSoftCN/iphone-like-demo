@@ -8,7 +8,7 @@ BOOL InitMainAnimates(const RECT *rt, void* userParam, void(*drawbkgnd)(HDC, con
 //////////////////////////////////////////////////
 ANIMATE* AppendMainAnimateIcons(int x, int y, int w, int h, BITMAP* bmps, BOOL is_topmost);
 
-BOOL LanchMainAnimates();
+BOOL LanchMainAnimates(void);
 
 void SetDragedIcon(ANIMATE* a, int x, int y);
 
@@ -16,21 +16,21 @@ void ReleaseDragedIcon(int x, int y, int w, int h, void(*on_animate_end)(void));
 
 void SetDragedIconPosition(int x, int y);
 
-void StartMoveIcons();
+void StartMoveIcons(void);
 
 void SetMoveIcon(ANIMATE*a, int x, int y);
 
-void RunMoveIcons();
+void RunMoveIcons(void);
 
-void CancelMoveIcons();
+void CancelMoveIcons(void);
 
-BOOL TerminateMainAnimate();
+BOOL TerminateMainAnimate(void);
 
 
 ////////////////////////////////////////////////////
 //switch bitmap application
 //
-BOOL BeginRadiationAndShrinkAnimates();
+BOOL BeginRadiationAndShrinkAnimates(void);
 
 ANIMATE*  AppendRadiationIcon(int *bmp, int x, int y, int w, int h, void* param);
 

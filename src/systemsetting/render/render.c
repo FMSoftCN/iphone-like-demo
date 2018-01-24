@@ -80,17 +80,6 @@ static TVITEMINFO bookInfo =
    contents 
 };
 
-static DLGTEMPLATE RenderDialog =
-{
-    WS_VISIBLE | WS_BORDER | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX, 
-    WS_EX_NONE,
-    0, 0, 240, 320, 
-    "Look&Feel Render",
-    0, 0,
-    1, NULL,
-    0
-};
-
 static DLGTEMPLATE ColorDisDialog =
 {
    WS_VISIBLE | WS_BORDER | WS_CAPTION,WS_EX_NONE,
@@ -375,7 +364,9 @@ void SetWindowStyleType (EM_STYLE_TYPE emType)
     g_emTmpStyleType = emType;
 }
 
-static int ColorDialogProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
+void SelectColor (HWND hosting, COLORRET *color);
+
+static LRESULT ColorDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 
     switch (message)
@@ -480,7 +471,7 @@ void SetWindowElementer (HWND hControl)
     SetWindowElementAttr (hControl, WE_MAINC_THREED_BODY, g_dwSetCFG[3]);
 }
 
-static int RenderDialogProc (HWND hWnd, int nMessage, WPARAM wParam, LPARAM lParam)
+static LRESULT RenderDialogProc (HWND hWnd, UINT nMessage, WPARAM wParam, LPARAM lParam)
 {
 
     switch (nMessage) {
@@ -799,6 +790,17 @@ HWND CreateRenderWindow (void)
     
     return CreateMainWindow (&CreateInfo);
 #if 0
+static DLGTEMPLATE RenderDialog =
+{
+    WS_VISIBLE | WS_BORDER | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX, 
+    WS_EX_NONE,
+    0, 0, 240, 320, 
+    "Look&Feel Render",
+    0, 0,
+    1, NULL,
+    0
+};
+
     RenderDialog.controls = RenderControl;
     RenderDialog.controlnr = sizeof (RenderControl) / sizeof (RenderControl[0]);
     while ((g_emStyleType != EM_TYPE_NONE) && (nRet != 0))

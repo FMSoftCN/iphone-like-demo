@@ -1,7 +1,7 @@
-
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
+
 #include <minigui/common.h>
 #include <minigui/minigui.h>
 #include <minigui/gdi.h>
@@ -43,9 +43,9 @@ static void on_end_draw_one_frame(ANIMATE_SENCE *as)
 }
 
 //called by p-code method, when swing icons
-static unsigned int change_objs_swing(int *param, int param_count)
+static intptr_t change_objs_swing(int *param, int param_count)
 {
-	static _idx = 0;
+	static int _idx = 0;
 	ANIMATE_SENCE * as = (ANIMATE_SENCE*)param[0];
 	ANIMATE* a = as->normal;
 	ANIMATE* h = a;
@@ -70,7 +70,7 @@ static unsigned int change_objs_swing(int *param, int param_count)
 
 //called by p-code method, when releaseDragedIcons' animate finished
 static void (*p_on_end_release_draged_icon)(void);
-static unsigned int clear_topmost(int *param, int param_count)
+static intptr_t clear_topmost(int *param, int param_count)
 {
 	RemoveAnimateFromTopMost(&mainSence, mainSence.topmost);
 	if(p_on_end_release_draged_icon)
@@ -89,7 +89,7 @@ static PCODE_NATIVE_METHOD_TABLE mainAnimatesNativeTable={
 	sizeof(mainAnimateNativeCallback)/sizeof(PCODE_NATIVE_METHOD)
 };
 
-static void drawIcon(HDC hdc, ANIMATE* a)
+static void drawIcon(HDC hdc, ANIMATE* a, void* context)
 {
 	//printf("drawIcon: %p,%d,%d,%d,%d,%d,img:%p\n",a,GetAnimateX(a), GetAnimateY(a), GetAnimateW(a), GetAnimateH(a), GetAnimateA(a),a->img);
 	if(GetAnimateW(a) == 0 || GetAnimateH(a) == 0)
@@ -147,7 +147,6 @@ BOOL InitMainAnimates(const RECT* rt, void* userParam, void(*drawbkgnd)(HDC, con
 ANIMATE* AppendMainAnimateIcons(int x, int y,int w, int h, BITMAP* bmps, BOOL is_topmost)
 {
 	ANIMATE* a;
-	int i;
 
 	a = (ANIMATE*)calloc(1, sizeof(ANIMATE));
 
@@ -326,6 +325,7 @@ BOOL TerminateMainAnimate()
 
 	DeleteMemDC(hdc_buffer);
 	hdc_buffer = HDC_INVALID;
+    return TRUE;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -418,7 +418,7 @@ BOOL BeginRadiationAndShrinkAnimates()
 
 ANIMATE*  AppendRadiationIcon(int *bmp, int x, int y, int w, int h, void *param)
 {
-	int x1, y1;
+	int x1 = 0, y1 = 0;
 	ANIMATE* a = (ANIMATE*) calloc(1, sizeof(ANIMATE));
 	
 	SetAnimateX(a, x);
@@ -518,5 +518,6 @@ BOOL RunRadiationAndShrinkAnimates( void (*on_finished)(ANIMATE_SENCE* as))
 
 	DeleteMemDC(hdc_buffer);
 	hdc_buffer = HDC_INVALID;
+    return TRUE;
 }
 

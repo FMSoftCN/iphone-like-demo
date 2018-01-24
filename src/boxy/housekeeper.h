@@ -91,5 +91,10 @@ typedef struct _PMP_RES_HASH_UNIT
 } PMP_RES_HASH_UNIT;
 
 
+int pmp_show_menu (HWND parent, const char* title, PMP_MENU_ITEM *items, void *context);
+int pmp_show_info(HWND h_parent_wnd, const char* title, const char* msg, DWORD dwStyle);
 
+#ifdef __cplusplus
+}
+#endif  /* __cplusplus */
 

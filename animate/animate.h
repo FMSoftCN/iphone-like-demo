@@ -1,6 +1,8 @@
 #ifndef ANIMATE_H
 #define ANIMATE_H
 
+#include <pthread.h>
+
 #include <minigui/common.h>
 #include <minigui/fixedmath.h>
 #include "p-code.h"

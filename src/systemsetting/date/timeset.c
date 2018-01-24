@@ -54,8 +54,6 @@ static DateTime g_datetime;
 
 //static PLOGFONT timefont,zone_font,dt_font;
 
-static WNDPROC old_edit_proc, old_btn_proc;
-static char editbuff[30];
 static BITMAP dt_bg_bmp,dt_btnok_bmp,dt_btncancel_bmp;
 static BITMAP time_up_bmp,time_down_bmp;
 static int g_time_edit_type;
@@ -94,6 +92,9 @@ static void ChangeTheHourAndMin (HWND hWnd, EM_TIME_TYPE emTimeType, EM_TIME_STA
 
     switch (emTimeType)
     {
+        case EM_TYPE_NULL:
+            break;
+
         case EM_TYPE_HOUR:
             {
                 RECT rcHour = {106, 97, 126, 117};
@@ -220,15 +221,16 @@ static void ChangeTheHourAndMin (HWND hWnd, EM_TIME_TYPE emTimeType, EM_TIME_STA
     }
 }
 
-
+#if 0
 static void Int2Str(int num, char *str)
 {
-    char i,j,tmpnum,tmpstr[10];
+    int i, j, tmpnum;
+    char tmpstr[10];
     char string[10];
     
 
     i = 0;
-   tmpnum = num;
+    tmpnum = num;
     while(tmpnum != 0)
     {
         tmpstr[i++] = tmpnum % 10;    
@@ -243,6 +245,8 @@ static void Int2Str(int num, char *str)
     string[j] = '\n';
     memcpy (str, string, strlen(string));
 }
+#endif
+
 static int SetDateTime(void)
 {
     struct tm nowday;
@@ -275,7 +279,6 @@ static void InitDatetime(void)
 {
     time_t nowtime;
     struct tm *pnt;
-    SYSTEMTIME date;
 
    // char buff[10] = {0};
     __mg_time (&nowtime);
@@ -285,10 +288,9 @@ static void InitDatetime(void)
   
 
 }
-static int DatetimeWinProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
+static LRESULT DatetimeWinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    HWND hwnd_time,houreditwnd, mineditwnd, hwnd_moncalendar;
-    SIZE size;
+    HWND hwnd_moncalendar;
     SYSTEMTIME date;
     static int key_state = DT_KEY_NONE;
      
@@ -333,7 +335,6 @@ static int DatetimeWinProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
     case MSG_PAINT:
         {
             HDC hdc;
-            LOGFONT logFont;
             char hour[3],min[3];
 
             sprintf (hour, "%02d", g_datetime.hour);
@@ -379,7 +380,6 @@ static int DatetimeWinProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
             RECT rcDown = {213, 109, 225, 118};
             int x = LOSWORD (lParam);
             int y = HISWORD (lParam);
-            char cTime[3];
           
 
             if (PtInRect (&rcHour, x, y))

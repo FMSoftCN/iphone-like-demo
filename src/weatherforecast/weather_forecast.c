@@ -157,7 +157,7 @@ static char *arabicstr[4] ={NULL};
 static char linebuf[512];
 static BOOL g_bMainToSub;
 
-static int    WeatherForecastProc(HWND hWnd,  int nMessage, WPARAM wParam, LPARAM lParam);
+static LRESULT WeatherForecastProc(HWND hWnd, UINT nMessage, WPARAM wParam, LPARAM lParam);
 HWND       g_hwnd;
 int MiniGUIMain (int argc, const char* argv[])
 {
@@ -166,7 +166,9 @@ int MiniGUIMain (int argc, const char* argv[])
    MAINWINCREATE CreateInfo;
    char  coldpath[256];
    char  cnewpath[256];
-   getcwd(coldpath,255);
+   if (getcwd(coldpath,255) == NULL)
+        return -1;
+
    strcpy(cnewpath,coldpath);
    strcat(cnewpath,"/weatherforecast/");
    //chdir(cnewpath);
@@ -208,7 +210,7 @@ int MiniGUIMain (int argc, const char* argv[])
    if(LoadBitmapNeeded())
    {
        printf("load bitmap error!\n");
-       return -1;
+       return 1;
    }
    
    CreateInfo.dwStyle   = WS_NONE;
@@ -229,22 +231,27 @@ int MiniGUIMain (int argc, const char* argv[])
    g_hwnd = hMainWnd = CreateMainWindow (&CreateInfo);
 
    if (hMainWnd == HWND_INVALID)
-       return -1;
-   //UpdateWindow (hMainWnd, FALSE); 
+       return 1;
+
 #if 0
    ShowWindow (hMainWnd, SW_SHOWNORMAL);
 #else
     ShowWindowUsingShareBuffer (hMainWnd);
 #endif
 
-   while (GetMessage(&Msg, hMainWnd)) {
-       TranslateMessage(&Msg);
-       DispatchMessage(&Msg);
-   }
-   chdir(coldpath);
-   EBListViewControlCleanup();
-   MainWindowThreadCleanup (hMainWnd);
-   return 0;
+    while (GetMessage(&Msg, hMainWnd)) {
+        TranslateMessage(&Msg);
+        DispatchMessage(&Msg);
+    }
+
+    EBListViewControlCleanup();
+    MainWindowThreadCleanup (hMainWnd);
+
+    if (chdir(coldpath)) {
+        return 1;
+    }
+
+    return 0;
 }
 
 /*PBITMAP iconlist1[CITY_NUM][3] = {
@@ -669,13 +676,10 @@ static void drawitemcallback(HWND hWnd, HDC hdc, void* context)
 }
 
 
-static int  WeatherForecastProc(HWND hWnd,  int nMessage, WPARAM wParam, LPARAM lParam)
+static LRESULT WeatherForecastProc(HWND hWnd, UINT nMessage, WPARAM wParam, LPARAM lParam)
 {
-    HDC  hDC,oldDC,lv_hDC;
+    HDC  hDC;
     int i;
-    gal_pixel line_pixel,bg_pixel,text_pixel; 
-    int j;
-    RECT  r_rect;
     static HWND lv_hWnd;
     static EBLVEXTDATA _listData ;
 

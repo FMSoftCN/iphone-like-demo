@@ -91,7 +91,7 @@ static void DrawBKGDefault (HDC hdc, const RECT* pRect, void* pParam)
     //do nothing
 }
 
-static void DrawAnimateDefault (HDC hdc, ANIMATE* pAnimate)
+static void DrawAnimateDefault (HDC hdc, ANIMATE* pAnimate, void* context)
 {
     if (GetAnimateW (pAnimate) != 0 && GetAnimateH (pAnimate) != 0) 
     {
@@ -113,9 +113,8 @@ static void DrawEndFrameDefault (ANIMATE_SENCE* pAnimateSence)
 
 void PushPullBitmap (HDC hdc, const RECT *rt, PBITMAP bmpPush, PBITMAP bmpPull, int frame_num, BOOL left_to_right)
 {
-	int w,h;
+	int w;
 	w = RECTWP(rt);
-	h = RECTHP(rt);
 	
         PUSH_PULL_OBJ objs[2] ={
 		{bmpPush,left_to_right?-w:w, 0,0,0},
@@ -238,7 +237,7 @@ int Client2TopMost (HWND hWnd)
     //pWnd = ((char*)pWnd) + 216;
     pWnd = ((char*)pWnd) + 192;
     pValue = (int*)pWnd;
-    printf("hwnd is %d, znode is %d.\n", hWnd, *pValue);
+    printf("hwnd is %p, znode is %d.\n", hWnd, *pValue);
     info.idx_znode = *pValue;
 
     req.id = 0x000D;
@@ -469,7 +468,7 @@ static void drawitemcallback(HWND hWnd, HDC hdc, void* context)
         printf("Here has an error!file:%s, func:%s\n",__FILE__,__func__);
 }
 
-static int SysMainProc(HWND hWnd, int nMessage, WPARAM wParam, LPARAM lParam)
+static LRESULT SysMainProc(HWND hWnd, UINT nMessage, WPARAM wParam, LPARAM lParam)
 {
     switch ( nMessage )
     {

@@ -952,9 +952,7 @@ static int handle_move( HWND hWnd, worm_list *worm, int count_wall,
 {
     int x, y;
     int count;
-    worm_node *worm_move;
     count = 0;
-    worm_move = worm->worm;
 
     move_change( worm, direction, &x, &y );
     right_direction( worm );
@@ -1308,11 +1306,11 @@ static void new_game( HWND hWnd )
     killtimes = 0;
 }
 
-static int WormGameProc( HWND hWnd, int message, WPARAM wParam, LPARAM lParam )
+static LRESULT WormGameProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
     char strText[50];    
     HDC hdc;
-    char st[7][20];
+    char st[7][200];
     char str[100];
     FILE *stream;
     switch(message) 
@@ -1365,16 +1363,16 @@ static int WormGameProc( HWND hWnd, int message, WPARAM wParam, LPARAM lParam )
                 }
                 else
                 {
-                    fgets( st[0], 100, stream );
-                    worm.score[0] = strtol( st[0], NULL, 10 );
-                    fgets( st[1], 100, stream );
-                    worm.score[1] = strtol( st[1], NULL, 10 );
-                    fgets( st[2], 100, stream );
-                    worm.score[2] = strtol( st[2], NULL, 10 );
-                    fgets( st[3], 100, stream );
-                    worm.score[3] = strtol( st[3], NULL, 10 );
-                    fgets( st[4], 100, stream );
-                    worm.score[4] = strtol( st[4], NULL, 10 );
+                    if (fgets( st[0], 100, stream ))
+                        worm.score[0] = strtol( st[0], NULL, 10 );
+                    if (fgets( st[1], 100, stream ))
+                        worm.score[1] = strtol( st[1], NULL, 10 );
+                    if (fgets( st[2], 100, stream ))
+                        worm.score[2] = strtol( st[2], NULL, 10 );
+                    if (fgets( st[3], 100, stream ))
+                        worm.score[3] = strtol( st[3], NULL, 10 );
+                    if (fgets( st[4], 100, stream ))
+                        worm.score[4] = strtol( st[4], NULL, 10 );
                     fclose( stream );
                 }
             }

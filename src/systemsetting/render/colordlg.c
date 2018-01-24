@@ -34,7 +34,7 @@ static void _RGB2HSV(int r, int g, int b, int *hout, int *sout, int *vout)
 	int max;
 	int min;
 	int delta;
-	int h, s, v;
+	int h = 0, s, v;
 
 	max = MAX3(r, g, b);
 	min = MIN3(r, g, b);
@@ -172,7 +172,6 @@ static void _x_line_by_s (HDC hdc, int x1, int x2, int y,
     int _x, _del_x;
     Uint8 _s, _del_s;
     Uint8 r, g, b;
-    gal_pixel pixel;
 
     _del_x = x2 -x1;
     if (_del_x == 0) return;
@@ -192,7 +191,6 @@ static void _y_line_by_s (HDC hdc, int x, int y1, int y2,
     int _y, _del_y;
     Uint8 _s, _del_s;
     Uint8 r, g, b;
-    gal_pixel pixel;
 
     _del_y = y2 -y1;
     if (_del_y == 0) return;
@@ -213,7 +211,6 @@ static int fill_h_triangle (HDC hdc, POINT ap, POINT bp1, POINT bp2, Uint16 h)
     int xinc, yinc;
     int rem;
     
-    Uint8 s;
     Uint8 v;
 
     if(bp1.y != bp2.y && bp1.x != bp2.x) return -1;        
@@ -344,7 +341,7 @@ static BOOL PtInCirle (int x, int y , int sx, int sy, int r1, int r2)
 
 static BOOL PtInTri (int x, int y, POINT pt1, POINT pt2, POINT pt3)
 {
-    double fa, fb, fc;
+    double fa = 0.0f, fb = 0.0f, fc = 0.0f;
     
     if (pt1.x != pt2.x && pt1.y != pt2.y) {
         fa = (((y-pt1.y)*(pt2.x-pt1.x))-((x-pt1.x)*(pt2.y-pt1.y)))
@@ -379,7 +376,7 @@ static BOOL PtInTri (int x, int y, POINT pt1, POINT pt2, POINT pt3)
         return TRUE;
 }
 
-static int ColorSelProc (HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
+static LRESULT ColorSelProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     HDC     hdc;
     static HDC      mem_dc;

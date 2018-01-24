@@ -76,7 +76,7 @@ static char *get_time_text( void )
     return buf;
 }
 
-static int load_image ()
+static int load_image (void)
 {
     if (LoadBitmapFromFile (HDC_SCREEN, &digit_bmp, DIGIT_IMAGE_FILE)) {
         fprintf (stderr, "Can't load image: %s\n", DIGIT_IMAGE_FILE);
@@ -96,7 +96,7 @@ static int load_image ()
     return 0;
 }
 
-static int create_bmp_font ()
+static int create_bmp_font (void)
 {
     dev_font = CreateBMPDevFont ("bmp-led-rrncnn-10-15-ISO8859-1",
                    &digit_bmp, "0", NR_DIGIT_GLYPHS, WIDTH_DIGIT);
@@ -136,7 +136,7 @@ static void create_mem_dc (HWND hWnd)
 
 
 
-static int WatchProc( HWND hWnd, int message, WPARAM wParam, LPARAM lParam )
+static LRESULT WatchProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
 
     switch( message ) {

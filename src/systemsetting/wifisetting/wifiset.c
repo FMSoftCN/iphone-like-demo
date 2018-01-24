@@ -10,9 +10,15 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>
+#include <pthread.h>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+
+#include "../sysmain.h"
 #include "wifiset.h"
 #include "ipset.h"
 
@@ -331,7 +337,7 @@ int GetWiFiInterfaceAP (WiFi_List** pWiFiList, const char* pStr)
     return 1;
 }
 
-void* GetWiFiInterfaceList ()
+void* GetWiFiInterfaceList (void* data)
 {
     int fds[2];
 	int rtn;
@@ -367,7 +373,7 @@ void* GetWiFiInterfaceList ()
            len++;
 
         wait(&rtn);
-	g_pList = buf;
+	    g_pList = buf;
     	return buf;
 	} else {
         close(1);
@@ -381,28 +387,19 @@ void* GetWiFiInterfaceList ()
     return NULL;
 }
 
-void StartSearchAPThread ()
+void StartSearchAPThread (void)
 {
     pthread_attr_t pThreadAttr;
     pthread_t tid;
-    int ret;
 
-    ret = pthread_attr_init (&pThreadAttr);
+    pthread_attr_init (&pThreadAttr);
     pthread_attr_setstacksize (&pThreadAttr, 256*1024);
-    ret = pthread_create (&tid, &pThreadAttr, GetWiFiInterfaceList, NULL);
-
+    pthread_create (&tid, &pThreadAttr, GetWiFiInterfaceList, NULL);
 }
 
 int InitWifiInterface(void)
 {
-    char cName [256];
-    char *pStart = NULL;
-    char *pEnd = NULL;
-    char gateway[32];
     char cWiFiName [16];
-    int number = 0;
-    int i;
-    WiFi_List_Pt pLink = NULL;
 
     memset (cWiFiName, 0x0, sizeof (cWiFiName));
     memset (g_cEssid, 0x0, sizeof (g_cEssid));
@@ -634,7 +631,7 @@ void StartSetAPThread ()
 
 }
 #endif
-static int PassWordErrorProc (HWND hWnd, int nMessage, WPARAM wParam, LPARAM lParam)
+static LRESULT PassWordErrorProc (HWND hWnd, UINT nMessage, WPARAM wParam, LPARAM lParam)
 {
     switch (nMessage)
     {
@@ -740,7 +737,7 @@ int CreatePassWordErrorWindow (void)
     return 0;
 }
 
-static int PassWordProc (HWND hWnd, int nMessage, WPARAM wParam, LPARAM lParam)
+static LRESULT PassWordProc (HWND hWnd, UINT nMessage, WPARAM wParam, LPARAM lParam)
 {
     switch (nMessage)
     {
@@ -868,16 +865,17 @@ static void InitPassWordCreateInfo(PMAINWINCREATE createInfo)
     createInfo->hHosting = HWND_DESKTOP;
 }
 
-static int CreatePassWordWindow (void)
+static HWND CreatePassWordWindow (void)
 {
     MAINWINCREATE CreateInfo;
-    HWND hMainwnd;
-    MSG Msg;
 
     InitPassWordCreateInfo(&CreateInfo);
  
     return CreateMainWindow(&CreateInfo);
 #if 0 
+    MSG Msg;
+    HWND hMainwnd;
+
     ShowWindow (hMainwnd, SW_SHOWNORMAL);
      while (GetMessage (&Msg, hMainwnd)){
          TranslateMessage (&Msg);

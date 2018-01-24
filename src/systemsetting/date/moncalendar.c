@@ -127,6 +127,7 @@ static void mcTextOutCenter ( HWND hWnd, HDC hdc, RECT* prcText, const char* pch
     }
 }
 
+#if 0
 /*up the rect which is not highlight*/
 static void mcUnHilightRect ( HWND hWnd, PMONCALDDATA mc_data, HDC hdc, RECT* prcItem, int day )
 {
@@ -145,6 +146,7 @@ static void mcUnHilightRect ( HWND hWnd, PMONCALDDATA mc_data, HDC hdc, RECT* pr
     SetTextColor ( hdc, PIXEL_black );
     mcTextOutCenter ( hWnd, hdc, prcItem, daytext );
 }
+#endif
 
 /*draw change day*/
 static void mcDrawDay ( HWND hWnd, HDC hdc, PMONCALDDATA mc_data, RECT* prcMDay, 
@@ -443,7 +445,7 @@ static void init_month_calendar_info(HWND hWnd, PMONCALDDATA data )
 
 /*The proc of the monthcalendar window*/
 
-static int MonCalendarCtrlProc ( HWND hWnd, int message, WPARAM wParam, LPARAM lParam )
+static LRESULT MonCalendarCtrlProc ( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
     HDC hdc;
     PMONCALDDATA mc_data = NULL;

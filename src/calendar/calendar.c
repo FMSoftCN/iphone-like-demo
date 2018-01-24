@@ -31,7 +31,7 @@
 #define IDC_CALENDAR     206
 
 
-static int CalendarProc ( HWND hWnd, int message, WPARAM wParam, LPARAM lParam )
+static LRESULT CalendarProc ( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
 	static BITMAP bmpbk;
 	static char* bk_name;

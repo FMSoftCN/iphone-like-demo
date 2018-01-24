@@ -110,9 +110,9 @@ typedef SYSTEMTIME *PSYSTEMTIME;
 #define YEAR_B          22//16//38
 
 int MonCalendarWindow(HWND hOwner);
-BOOL RegisterMonCalendarControl ();
-void MonCalendarControlCleanup ();
-void UnregisterMonCalendarContorl ();
+BOOL RegisterMonCalendarControl (void);
+void MonCalendarControlCleanup (void);
+void UnregisterMonCalendarContorl (void);
 
 #endif /* EXT_MONTHCAL_H */
 
