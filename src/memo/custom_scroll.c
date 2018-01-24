@@ -123,15 +123,15 @@ void draw_scrollbar (HWND hWnd, HDC hdc, int sb_pos)
     RECT rect;
     int sb_status = 0;
     int bn_status = 0;
-    DWORD color_3d, fgc_3d, fgc_dis;
+    DWORD color_3d/*, fgc_3d, fgc_dis*/;
     gal_pixel old_brush_color;
     BOOL isCtrl = FALSE; /* if TRUE it is scrollbar control else not */
     const WINDOWINFO  *info = 
         (WINDOWINFO*)GetWindowInfo (hWnd);
         
     color_3d = GetWindowElementAttr(hWnd, WE_MAINC_THREED_BODY);
-    fgc_3d = GetWindowElementAttr(hWnd, WE_FGC_THREED_BODY);
-    fgc_dis = GetWindowElementAttr(hWnd, WE_FGC_DISABLED_ITEM);
+    //fgc_3d = GetWindowElementAttr(hWnd, WE_FGC_THREED_BODY);
+    //fgc_dis = GetWindowElementAttr(hWnd, WE_FGC_DISABLED_ITEM);
     
     if (0 == strncasecmp(CTRL_SCROLLBAR, GetClassName(hWnd), strlen(CTRL_SCROLLBAR)))
     {

@@ -42,10 +42,13 @@
 
 #define MSG_SHAREBUFFER_READY    5000
 
+static LRESULT MemoEditProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+static LRESULT EbListControlProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+static void dumpRegion (HDC hdc);
+
 static void Edit2ListAnimate(HWND hDlg);
 static void List2EditAnimate(HWND hDlg);
 static void GetWindowBitmap(HWND hDlg, PBITMAP pbmp);
-static void ShowDoubleBufferWin(HWND hWnd);
 static void DeleteDlgAnimateOut(PBITMAP pbmp);
 static void DeleteDlgAnimateIn(PBITMAP pbmp);
 static void DrawDoubleBufferWindow(HWND hWnd);
@@ -63,9 +66,7 @@ static PLOGFONT pedit_title_font;
 static PLOGFONT plist_title_font;
 static PLOGFONT plist_eblist_font;
 static int g_row;
-static int g_max_row;
 static HWND hListWin;
-static HWND hEditWin;
 static BOOL g_bMainToSub;
 
 #if 0
@@ -97,7 +98,6 @@ static char*  bmp_file[] = {
 
 static BOOL list_res_load    = FALSE;
 static BOOL edit_res_load    = FALSE;
-static BOOL delete_res_load  = FALSE;
 
 static char*  list_bmp_file[] = {
     F_MEMO_BK,   
@@ -143,12 +143,10 @@ WINDOW_ELEMENT_RENDERER* current_rdr;
 
 #define ALL_BMP_NUM  35
 
-static int     g_pos;
 static BITMAP  bmp_all[ALL_BMP_NUM];
 
 static WNDPROC OldEditProc;
 static WNDPROC OldEbListProc;
-static HWND    hListview;
 static RECT    g_scroll_rc;
 static HDC     g_bkdc;
 static HDC     g_buffdc;
@@ -432,7 +430,6 @@ static HWND AddOneMemoListItem(HWND hList, int nItem, MEMOITEM* list)
 
 static int InitMemoList (HWND hWnd)
 {
-    HWND hTitle;
     int i = 0;
     EBLVCOLOUM stListViewColumn;
     //int itemCount = TABLESIZE(g_memo_list);
@@ -478,6 +475,7 @@ void static GetScrollBkbmp(HWND hWnd, RECT* rc)
     ReleaseDC (hdc);
 }
 
+#if 0
 void static GetEditBkbmp(HWND hWnd, HWND hEdit)
 {
     HDC  memDC;
@@ -492,13 +490,15 @@ void static GetEditBkbmp(HWND hWnd, HWND hEdit)
     DeleteCompatibleDC(memDC);
     ReleaseDC (hdc);
 }
-
+#endif
 
 static void lv_notify_process (HWND hwnd, int id, int code, DWORD addData)
 {
 	PEBLSTVWDATA pListdata = (PEBLSTVWDATA)addData;
     PEBITEMDATA  pCell = NULL;
+#ifdef  _DEBUG
     static int count = 0;
+#endif
     if (pListdata && code == ELVN_SELCHANGE) {
         pCell = pListdata->pItemSelected;
         if (pCell->nRows <= 0) return;
@@ -538,6 +538,7 @@ void static GetListBkbmp(HWND hWnd)
     GetBitmapFromDC (g_bkdc, 0, EDIT_TOP, EDIT_W, EDIT_H,   (PBITMAP)RetrieveRes(F_EDIT_BK));
 }
 
+#if 0
 void static GetDelAnimatebmp(HWND hWnd)
 {
     HDC hdc;
@@ -550,8 +551,9 @@ void static GetDelAnimatebmp(HWND hWnd)
     DeleteCompatibleDC(g_bkdc);
     ReleaseDC (hdc);
 }
+#endif
 
-static int EbListControlProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
+static LRESULT EbListControlProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     HDC hdc;
     switch (message) {
@@ -612,12 +614,10 @@ static void SetBoldFont(HWND hWnd, PLOGFONT* pfont)
     SetWindowFont(hWnd, *pfont);
 }
 
-static int MemoListProc (HWND hDlg, int message, WPARAM wParam, LPARAM lParam )
+static LRESULT MemoListProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam )
 {
     HDC  hdc;
     HWND hCtrl;
-    RECT rc;
-    int  size;
 
     switch ( message ) {
         case MSG_CREATE:
@@ -795,7 +795,7 @@ void WinMoveToUp (HWND hWnd)
     ClientSetActiveWindow (hWnd);
 }
 
-static int MemoDeleteProc (HWND hDlg, int message, WPARAM wParam, LPARAM lParam )
+static LRESULT MemoDeleteProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam )
 {
     HDC  hdc;
     HWND hCtrl;
@@ -830,9 +830,7 @@ static int MemoDeleteProc (HWND hDlg, int message, WPARAM wParam, LPARAM lParam 
             break;
         case MSG_ERASEBKGND:
             {
-                RECT  rc;
                 BOOL  fGetDC = FALSE;
-                RECT* clip = (RECT*) lParam;
 
                 hdc = (HDC)wParam;
                 if (!hdc){
@@ -858,7 +856,7 @@ static int MemoDeleteProc (HWND hDlg, int message, WPARAM wParam, LPARAM lParam 
     return DefaultDialogProc (hDlg, message, wParam, lParam);
 }
 
-
+#if 0
 void static GetEditCtrlBkbmp(HWND hWnd, HWND hEdit)
 {
     HDC memDC;
@@ -873,6 +871,7 @@ void static GetEditCtrlBkbmp(HWND hWnd, HWND hEdit)
     DeleteCompatibleDC(memDC);
     ReleaseDC (hdc);
 }
+#endif
 
 static void tePaint(HWND hWnd, HDC hdc, RECT *rcDraw)
 {
@@ -880,7 +879,7 @@ static void tePaint(HWND hWnd, HDC hdc, RECT *rcDraw)
     RECT clientrect;
     RECT *rc = rcDraw;
     RECT margin_rc;
-    int h, indent = 0;
+    int h;
     int nLineHeight = SendMessage(hWnd, EM_GETLINEHEIGHT, 0, 0);
 
     SendMessage(hWnd, EM_GETMARGINS, 0, (LPARAM)&margin_rc);
@@ -1061,6 +1060,7 @@ static void EditDrawPaper(HWND hWnd, HDC hdc)
     tePaint(hWnd, hdc, &rcDraw);
 }
 
+#if 0
 static void PaintTextEdit(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
 {
     HDC hdc;
@@ -1073,6 +1073,7 @@ static void PaintTextEdit(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
     tePaint(hWnd, hdc, &rcDraw);
     ReleaseDC(hdc);
 }
+#endif
 
 static void IncludeMarginScroll(HWND hWnd, HDC hdc, BOOL clip)
 {
@@ -1120,9 +1121,8 @@ static void IncludeMarginScroll(HWND hWnd, HDC hdc, BOOL clip)
 }
 
 static WNDPROC OldEditNotesProc;
-static int EditNotesProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
+static LRESULT EditNotesProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    HDC hdc;
     switch (message) {
         case MSG_ERASEBKGND:
             break;
@@ -1130,7 +1130,7 @@ static int EditNotesProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
     return OldEditNotesProc(hWnd, message, wParam, lParam);
 }
 
-static int EditControlProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
+static LRESULT EditControlProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     HDC hdc;
     switch (message) {
@@ -1146,7 +1146,6 @@ static int EditControlProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
             break;
         case MSG_NCPAINT:
             {
-                BOOL  fGetDC = FALSE;
                 RECT  rc;
                 HDC   hdc; 
                 HDC   mem_dc;
@@ -1262,9 +1261,9 @@ static int DoubleBufferProc (HWND hWnd, HDC private_dc, HDC real_dc,
 void GUIAPI UpdateAll (HWND hWnd, BOOL fErase)
 {
     MSG Msg;
-    RECT rect;
 
 #if 0
+    RECT rect;
     if (fErase)
         SendAsyncMessage (hWnd, MSG_CHANGESIZE, 0, 0);
 
@@ -1304,15 +1303,17 @@ static void GetDoubleBufferBitmap(HWND hWnd, PBITMAP pbmp)
     //BitBlt(hdc, 0, 0, SCR_W, SCR_H, HDC_SCREEN, 0, 0, 0); 
 }
 
+#if 0
+static void ShowDoubleBufferWin(HWND hWnd);
 static void ShowDoubleBufferWin(HWND hWnd)
 {
     HDC hdc;
-    int w = 0, h = 0;
     hdc = GetSecondaryDC (hWnd);
     SetSecondaryDC(hWnd, hdc, DoubleBufferProc);
     ShowWindow (hWnd, SW_SHOWNORMAL);
     SetSecondaryDC(hWnd, hdc, NULL);
 }
+#endif
 
 static void DrawDoubleBufferWindow(HWND hWnd)
 {
@@ -1333,7 +1334,7 @@ static BITMAP g_stBitmap;
 static HDC g_DownDC;
 static HDC g_UpDC;
 
-static void DrawAnimateDefault (HDC hdc, ANIMATE* pAnimate)
+static void DrawAnimateDefault (HDC hdc, ANIMATE* pAnimate, void* context)
 {
 
     if (GetAnimateW (pAnimate) != 0 && GetAnimateH (pAnimate) != 0) 
@@ -1389,8 +1390,6 @@ void iPAQRollPage(BOOL dir)
 void ScrollMemoAnimate(HDC hdc, BOOL dir, int frame_num);
 void RollPage(HDC upDC, HDC downDC, BOOL dir, int frame_num)
 {
-    BITMAP srcbmp;
-
     if (dir)
         InitScrollPage(upDC, downDC, SCR_W, SCR_H, frame_num);
     else
@@ -1406,12 +1405,8 @@ void RollPage(HDC upDC, HDC downDC, BOOL dir, int frame_num)
 
 void ScrollMemoAnimate(HDC hdc, BOOL dir, int frame_num)
 {
-    int w, h;
     BITMAP bmp;
     const RECT rt = {0, 0, SCR_W, SCR_H};
-
-    w = RECTW(rt);
-    h = RECTH(rt);
 
     PUSH_PULL_OBJ objs[] ={
         {&bmp, 0, 0, 0, 0},
@@ -1441,7 +1436,7 @@ void ScrollMemoAnimate(HDC hdc, BOOL dir, int frame_num)
 
 #endif
 
-static GotoNextMemo(HWND hWnd, BOOL dir)
+static void GotoNextMemo(HWND hWnd, BOOL dir)
 {
     HWND hCtrl;
 
@@ -1523,10 +1518,12 @@ static void AnimateDownToNew(HWND hWnd)
 static void SetEbButtonData(HWND hWnd)
 {
     HWND hCtrl;
-    PBITMAP pbmp;
+    //PBITMAP pbmp;
+
     hCtrl = GetDlgItem (hWnd, IDC_MEMONEW);
     SetWindowAdditionalData(hCtrl, (DWORD)RetrieveRes(F_MEMO_NEW));
     SendMessage(hCtrl, BUTTON_UPDATEBMP, 0, 0);
+
 #if 0
     pbmp = (PBITMAP)RetrieveRes(F_MEMO_NEW);
     pbmp->bmType |= BMP_TYPE_ALPHACHANNEL;
@@ -1535,29 +1532,29 @@ static void SetEbButtonData(HWND hWnd)
     hCtrl = GetDlgItem (hWnd, IDC_MEMODOWN);
     SetWindowAdditionalData(hCtrl, (DWORD)RetrieveRes(F_MEMO_DOWN));
     SendMessage(hCtrl, BUTTON_UPDATEBMP, 0, 0);
-    pbmp = (PBITMAP)RetrieveRes(F_MEMO_NEW);
+    //pbmp = (PBITMAP)RetrieveRes(F_MEMO_NEW);
     hCtrl = GetDlgItem (hWnd, IDC_MEMOTRASH);
     SetWindowAdditionalData(hCtrl, (DWORD)RetrieveRes(F_EDIT_TRASH));
     SendMessage(hCtrl, BUTTON_UPDATEBMP, 0, 0);
-    pbmp = (PBITMAP)RetrieveRes(F_MEMO_NEW);
+    //pbmp = (PBITMAP)RetrieveRes(F_MEMO_NEW);
     hCtrl = GetDlgItem (hWnd, IDC_MEMONOTES);
     SendMessage(hCtrl, BUTTON_UPDATEBMP, 0, 0);
-    pbmp = (PBITMAP)RetrieveRes(F_MEMO_NEW);
+    //pbmp = (PBITMAP)RetrieveRes(F_MEMO_NEW);
     SetWindowAdditionalData(hCtrl, (DWORD)RetrieveRes(F_EDIT_NOTES));
     SendMessage(hCtrl, BUTTON_UPDATEBMP, 0, 0);
-    pbmp = (PBITMAP)RetrieveRes(F_MEMO_NEW);
+    //pbmp = (PBITMAP)RetrieveRes(F_MEMO_NEW);
     hCtrl = GetDlgItem (hWnd, IDC_MEMOEMAIL);
     SetWindowAdditionalData(hCtrl, (DWORD)RetrieveRes(F_EDIT_EMAIL));
     SendMessage(hCtrl, BUTTON_UPDATEBMP, 0, 0);
-    pbmp = (PBITMAP)RetrieveRes(F_MEMO_NEW);
+    //pbmp = (PBITMAP)RetrieveRes(F_MEMO_NEW);
     hCtrl = GetDlgItem (hWnd, IDC_MEMOLAR);
     SetWindowAdditionalData(hCtrl, (DWORD)RetrieveRes(F_EDIT_LARROW));
     SendMessage(hCtrl, BUTTON_UPDATEBMP, 0, 0);
-    pbmp = (PBITMAP)RetrieveRes(F_MEMO_NEW);
+    //pbmp = (PBITMAP)RetrieveRes(F_MEMO_NEW);
     hCtrl = GetDlgItem (hWnd, IDC_MEMORAR);
     SetWindowAdditionalData(hCtrl, (DWORD)RetrieveRes(F_EDIT_RARROW));
     SendMessage(hCtrl, BUTTON_UPDATEBMP, 0, 0);
-    pbmp = (PBITMAP)RetrieveRes(F_MEMO_NEW);
+    //pbmp = (PBITMAP)RetrieveRes(F_MEMO_NEW);
 }
 
 #define REQID_OPENIMEWND        0x000F
@@ -1567,7 +1564,7 @@ static void SetEbButtonData(HWND hWnd)
 #include "../sfkbd_client.h"
 
 #define SFKBD_REQID    (MAX_SYS_REQID + 9)
-static int CloseIMEMethod(HWND hWnd, BOOL open)
+static void CloseIMEMethod(HWND hWnd, BOOL open)
 {
 #if 0
     int ret;
@@ -1577,11 +1574,11 @@ static int CloseIMEMethod(HWND hWnd, BOOL open)
     req.len_data = sizeof (BOOL);
     ClientRequest(&req, NULL, 0);
 #else
-    MSG Msg;
-    unsigned int tick_count = GetTickCount ();
     SFKBDShow (open);
     /* if have IME animate.*/
 #if 0
+    MSG Msg;
+    DWORD tick_count = GetTickCount ();
     while (GetMessage (&Msg, HWND_DESKTOP)) {
         if (!SFKBDIsShown())
             break;
@@ -1626,7 +1623,7 @@ static void SetDateTime(HWND hWnd)
     //time_t nowtime;
     //struct tm *pnt;
     HWND hCtrl;
-    int year, month, mday;
+    int /*year, */month, mday;
 
     time_t t;
     struct tm * tm;
@@ -1636,7 +1633,7 @@ static void SetDateTime(HWND hWnd)
 
     //__mg_time( &nowtime );
     //pnt = (struct tm * )__mg_localtime (nowtime);
-    year  = tm->tm_year + 1900;
+    //year  = tm->tm_year + 1900;
     month = tm->tm_mon + 1;
     mday  = tm->tm_mday + 1;
                     
@@ -1654,7 +1651,7 @@ static void def_draw_bkgnd(HDC hdc, const RECT* rtbk, void *param)
             RetrieveRes(F_DEL_ANIMATE_BK));
 }
 
-static void def_draw_del_animate(HDC hdc, ANIMATE*ani)
+static void def_draw_del_animate(HDC hdc, ANIMATE*ani, void* context)
 {
     if(GetAnimateW(ani) != 0 && GetAnimateH(ani)!=0)
     {
@@ -1734,7 +1731,7 @@ static void def_nothing_bkgnd(HDC hdc, const RECT* rtbk, void *param)
     /* do nothing. */
 }
 
-static void def_draw_animate(HDC hdc, ANIMATE*ani)
+static void def_draw_animate(HDC hdc, ANIMATE*ani, void* context)
 {
     if(GetAnimateW(ani) != 0 && GetAnimateH(ani)!=0)
     {
@@ -1758,9 +1755,9 @@ static void on_end_draw_one_frame(ANIMATE_SENCE *as)
 static void PushPullBitmapAnimate(HDC hdc, const RECT *rt, 
         PBITMAP bmpPush, PBITMAP bmpPull, int frame_num, BOOL left_to_right)
 {
-	int w,h;
+	int w;
+
 	w = RECTWP(rt);
-	h = RECTHP(rt);
 	PUSH_PULL_OBJ objs[2] ={
 		{bmpPush,left_to_right?-w:w, 0,0,0},
 		{bmpPull,0, 0, left_to_right?w:-w, 0}
@@ -1786,10 +1783,20 @@ static void List2EditAnimate(HWND hDlg)
             (PBITMAP)RetrieveRes(F_LIST_SNOP), ANIMATE_FRAME, FALSE);
 }
 
+static void Edit2ListAnimate(HWND hDlg)
+{
+    UnloadBitmap((PBITMAP)RetrieveRes(F_LIST_SNOP));
+    //GetDoubleBufferBitmap(hDlg, (PBITMAP)RetrieveRes(F_LIST_SNOP));
+    GetWindowBitmap(hDlg, (PBITMAP)RetrieveRes(F_LIST_SNOP));
+    PushPullBitmapAnimate(g_buffdc, &g_rcScr, (PBITMAP)RetrieveRes(F_LIST_SNOP), 
+            (PBITMAP)RetrieveRes(F_EDIT_SNOP), ANIMATE_FRAME, TRUE);
+}
+
+#if 0
 #define SURFACE(dc)    ((BYTE*)dc+2*sizeof(short)+2*sizeof(int))
 #define PIXEL(surface) ((BYTE*)surface+4*sizeof(int)+2*sizeof(char*))
 
-static int PaintAllControl(HWND hDlg)
+static void PaintAllControl(HWND hDlg)
 {
     HWND hCtrl = 0;
     ShowWindow(hDlg, SW_SHOWNORMAL); 
@@ -1802,18 +1809,11 @@ static int PaintAllControl(HWND hDlg)
         _MG_DEBUG("%d\n", hCtrl);
     }while(hCtrl && hCtrl != HWND_INVALID);
 }
-
-static void Edit2ListAnimate(HWND hDlg)
-{
-    UnloadBitmap((PBITMAP)RetrieveRes(F_LIST_SNOP));
-    //GetDoubleBufferBitmap(hDlg, (PBITMAP)RetrieveRes(F_LIST_SNOP));
-    GetWindowBitmap(hDlg, (PBITMAP)RetrieveRes(F_LIST_SNOP));
-    PushPullBitmapAnimate(g_buffdc, &g_rcScr, (PBITMAP)RetrieveRes(F_LIST_SNOP), 
-            (PBITMAP)RetrieveRes(F_EDIT_SNOP), ANIMATE_FRAME, TRUE);
-}
+#endif
 
 static void GetWindowBitmap(HWND hDlg, PBITMAP pbmp)
 {
+#if 0
     HDC hdc;
     HDC mem_dc;
     RECT  rc;
@@ -1843,11 +1843,19 @@ static void GetWindowBitmap(HWND hDlg, PBITMAP pbmp)
     //while(1);
     ReleaseDC(hdc);
     DeleteCompatibleDC(mem_dc);
+#else
+    HDC hdc;
+    RECT  rc;
+
+    GetWindowRect(hDlg, &rc);
+    hdc    = GetDC (hDlg);
+    GetBitmapFromDC (hdc, rc.left, rc.top, RECTW(rc), RECTH(rc), pbmp);
+    ReleaseDC(hdc);
+#endif
 }
 
-static int MemoEditProc (HWND hDlg, int message, WPARAM wParam, LPARAM lParam)
+static LRESULT MemoEditProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    HDC  hdc;
     RECT rc;
     HWND hCtrl;
     HWND hEdit;
@@ -2168,7 +2176,9 @@ int MiniGUIMain (int argc, const char* argv[])
     JoinLayer(NAME_DEF_LAYER , "memo" , 0 , 0);
 #endif
     {
+#ifdef _DEBUG
         char res_path[255];
+#endif
         _MG_DEBUG("current path: %s,%s\n", getcwd(res_path, 255), argv[0]);
     }
 	SetInterval(50);

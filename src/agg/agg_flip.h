@@ -10,7 +10,7 @@ extern "C" {
 
 BOOL LoadFrontBitmapFromDC(HWND hwnd);
 BOOL LoadRearBitmapFromDC(HWND hwnd);
-BOOL InitFlipAnimation();
+BOOL InitFlipAnimation(void);
 void Agg_Flip(HDC hdc, int interval);
 
 #ifdef __cplusplus

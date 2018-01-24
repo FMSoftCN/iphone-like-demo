@@ -155,10 +155,6 @@
 #define F_DEL_SNOP    RES_PATH"del_snop.png"
 #define F_DEL_ANIMATE_BK  RES_PATH"animate_del_bk.png"
 
-static void lv_notify_process(HWND hwnd, int id, int code, DWORD addData);
-static int  MemoEditProc(HWND hDlg, int message, WPARAM wParam, LPARAM lParam);
-static int EbListControlProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam);
-static void dumpRegion(HDC hdc);
 void   draw_scrollbar(HWND hWnd, HDC hdc, int sb_pos);
 WINDOW_ELEMENT_RENDERER* get_window_renderer(HWND hWnd);
 
