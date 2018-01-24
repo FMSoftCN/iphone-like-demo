@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdio.h>
-#include<unistd.h>
+#include <unistd.h>
 
 //extern "C" {
 #include <minigui/common.h>
@@ -188,10 +188,10 @@ class ScrollPageAppClass: public agg::platform_support
 
             if (mLineX [1] < 0)
             {
-                double a, b;
+                double /*a, */b;
                 double m;
                 m = mCurveDownY [0] - g_Rect.top;
-                a = ((2 * m - (g_Rect.right - g_Rect.left)) * m) / (2 * m - m / 3);
+                //a = ((2 * m - (g_Rect.right - g_Rect.left)) * m) / (2 * m - m / 3);
                 b = (2 * (2 * m - (g_Rect.right - g_Rect.left)) * m) / (3 * (2 *m - m / 6));
                 pLeftPath.move_to (mLineX [2], mLineY [2]);
                 pLeftPath.line_to (g_Rect.left, b);
@@ -219,7 +219,7 @@ class ScrollPageAppClass: public agg::platform_support
 
 
             typedef agg::conv_bspline<agg::curve4> curve4_type;
-            typedef agg::conv_bspline<agg::path_storage> path_storage_type;
+            //typedef agg::conv_bspline<agg::path_storage> path_storage_type;
 
 
             curve4_type bezier (cTest);
@@ -461,6 +461,10 @@ enum flip_y_e { flip_y = true };
 
 ScrollPageAppClass g_ScrollPageClass (pix_format, flip_y);
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 BOOL InitScrollPage (HDC hUpLayerDC, HDC hDownLayerDC, int nWidth, int nHeight, int nFlame)
 {
 
@@ -570,4 +574,7 @@ BOOL ScrollPageFlame (int nIdxFlame, PBITMAP pBitmap, HDC hdc_show)
      return TRUE;
 }
 
+#ifdef __cplusplus
+}
+#endif
 

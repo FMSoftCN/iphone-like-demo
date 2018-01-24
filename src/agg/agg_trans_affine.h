@@ -92,10 +92,6 @@ namespace agg
     //----------------------------------------------------------------------
     struct trans_affine
     {
-        //[ sx  shy ]
-        //[ shx sy  ]
-        //[ tx  ty  ]
-        //
         double sx, shy, shx, sy, tx, ty;
 
         //------------------------------------------ Construction

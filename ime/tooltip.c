@@ -27,7 +27,6 @@ static int init_ttw_data (HWND hWnd, TTW_PDATA padd)
 {              
     int i;
    
-    
     if (get_kbd_mybitmap (&(padd->mask), padd->pal, TTW_MASK_BMP)) {
         fprintf (stderr, "Fail to load bitmap for tooltip window mask. \n");
         return 1;
@@ -97,7 +96,7 @@ static int destroy_ttw_data (HWND hWnd)
 }
 
 
-static int TTWinProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
+static LRESULT TTWinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     HDC hdc;
     TTW_PDATA padd;
@@ -240,5 +239,6 @@ int ShowToolTip (HWND hwnd, int x, int y, char key_char)
 int HideToolTip (HWND hwnd)
 {
     ShowWindow (hwnd, SW_HIDE);
+    return 0;
 }
 

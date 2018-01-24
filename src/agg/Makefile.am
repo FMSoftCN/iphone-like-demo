@@ -1,4 +1,4 @@
-lib_LTLIBRARIES = libagg.la
+noinst_LTLIBRARIES = libagg.la
 
 SRC_FILES = agg_flip.cpp  \
 	    agg_scroll.cpp \

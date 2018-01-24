@@ -52,7 +52,7 @@ void display_text(HDC hdc)
     DestroyLogFont(lrc_font);
 }
 
-static int OthersWinProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
+static LRESULT OthersWinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     HDC hdc;
     switch (message) {
@@ -74,19 +74,11 @@ static int OthersWinProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
         case MSG_ERASEBKGND:
             hdc = (HDC)wParam;
             const RECT* clip = (const RECT*) lParam;
-            BOOL fGetDC = FALSE, fSecondary = TRUE;
+            BOOL fGetDC = FALSE;
             RECT rcTemp;
 
             if (hdc == 0) {
-                //hdc = GetClientDC (hWnd);
-#if 0
-                if ((hdc = GetSecondaryDC(hWnd)) == HDC_SCREEN) {
-                    hdc = GetClientDC(hWnd);
-                    fSecondary = FALSE;
-                }
-#else
                 hdc = GetSecondaryClientDC(hWnd);
-#endif
                 fGetDC = TRUE;
             }
 
@@ -99,14 +91,7 @@ static int OthersWinProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
 
             FillBoxWithBitmap(hdc, 0, 0, 0, 0, &backbitmap);
             if (fGetDC){
-#if 0
-                if (fSecondary)
-                    ReleaseSecondaryDC(hWnd, hdc);
-                else
-                    ReleaseDC (hdc);
-#else
                 ReleaseSecondaryDC(hWnd, hdc);
-#endif
             }
             return 0;
 #if 0

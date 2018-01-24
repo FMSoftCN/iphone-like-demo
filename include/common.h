@@ -35,4 +35,23 @@
 #endif
 */
 
+#if defined(__GNUC__)
+#ifdef _DEBUG_MSG
+#   define _MY_PRINTF(fmt...) fprintf (stderr, fmt)
+#else
+#   define _MY_PRINTF(fmt...)
+#endif
+#else /* __GNUC__ */
+static inline void _MY_PRINTF(const char* fmt, ...)
+{
+#ifdef _DEBUG_MSG
+    va_list ap;
+    va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    fprintf(stderr, "\n");
+    va_end(ap);
+#endif
+}
+#endif /* __GNUC__ */
+
 #endif

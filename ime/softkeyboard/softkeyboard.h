@@ -25,6 +25,7 @@
 #include <minigui/window.h>
 
 #include "../../config.h"
+#include "../libime/mgpti.h"
 
 #ifdef SOFTKBD_320_240
 #include "320-240/size_320x240.h"
@@ -34,7 +35,7 @@
 #include "240-320/size_240x320.h"
 #endif 
 
-#define _MY_PRINTF(fmt...) fprintf (stderr, fmt)
+//#define _MY_PRINTF(fmt...) fprintf (stderr, fmt)
 
 #define SFKB_NUM 4
 
@@ -291,9 +292,9 @@ typedef struct _md_ime_t{
 
 typedef struct _action_t {
 	int operation; //AC_SEND_MSG, AC_CHANGE_KBD...
-	int message;
-	int wParam;
-	int lParam;
+	UINT message;
+	WPARAM wParam;
+	LPARAM lParam;
 	char* str; //word to send;
     /*unused*/
 	//int next_kbd_id;
@@ -326,7 +327,7 @@ typedef struct _key_board_t {
 
 	/* this function is used to proceed messages we cared
 	 * for example:
-	 * int pinyin_proceed_msg(struct _key_bord_t* key_board, HWND hwnd, int message, WPARAM wParam, LPARAM lParam) 
+	 * LRESULT pinyin_proceed_msg(struct _key_bord_t* key_board, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 	 * {
 	 *	static RECT old_hit_rect; 
 	 *	POINT p;
@@ -370,7 +371,7 @@ typedef struct _key_board_t {
 	 *		}
 	 * }
 	 **/
-	int (*proceed_msg)(struct _key_board_t* key_board, HWND hwnd, int message, WPARAM wParam, LPARAM lParam);
+	LRESULT (*proceed_msg)(struct _key_board_t* key_board, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 } key_board_t;
 
 
@@ -397,5 +398,8 @@ void destroy_punct_keyboard (key_board_t *kb);
 
 int get_kbd_bitmap (HDC hdc, PBITMAP pbmp, int id);
 void release_kbd_bitmap (PBITMAP pbmp);
+
+int get_kbd_mybitmap (PMYBITMAP pmybmp, RGB *pal,  int id);
+void release_kbd_mybitmap (PMYBITMAP pmybmp);
 
 #endif

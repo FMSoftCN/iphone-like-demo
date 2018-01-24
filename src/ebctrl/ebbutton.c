@@ -42,12 +42,11 @@ typedef struct _MGD_BUTTON_DATA
 typedef MGD_BUTTON_DATA* MGD_BUTTON_DATA_PT;
 
 
-static int MgdButtonProc (HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
+static LRESULT MgdButtonProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     HDC     hdc;
     RECT   rect;
     static int var;
-    gal_pixel  ret;
     BITMAP *skin;
     
     DWORD Style;// = GetWindowStyle (hwnd);
@@ -109,13 +108,11 @@ static int MgdButtonProc (HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
 
                  /* if only one bitmap.*/
                  if (skin && (rect.right * 2 > skin->bmWidth)){
-                   ret = GetPixelInBitmap (skin, 0, 0);
+                   GetPixelInBitmap (skin, 0, 0);
                  }
                  else if (skin)
-                   ret = GetPixelInBitmap (skin, LOWORD (lParam)*(skin->bmHeight)/rect.bottom, 
+                   GetPixelInBitmap (skin, LOWORD (lParam)*(skin->bmHeight)/rect.bottom, 
                        HIWORD (lParam)*skin->bmWidth/(4*rect.right));
-                 else
-                   ret = 1;
 #if 1 
                  if (pData->dwStyle & MGDBUTTON_ANTISTATE)
                  {
@@ -159,7 +156,7 @@ static int MgdButtonProc (HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
                  UpdateWindow (hwnd, FALSE);
              }
              }
-             PostMessage (GetParent (hwnd), BUTTON_TIP, hwnd, wParam);
+             PostMessage (GetParent (hwnd), BUTTON_TIP, (WPARAM)hwnd, (LPARAM)wParam);
              break;
         case BUTTON_NORMAL:
              {
@@ -197,7 +194,7 @@ static int MgdButtonProc (HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
                  MGD_BUTTON_DATA_PT pData = (MGD_BUTTON_DATA_PT) GetWindowAdditionalData2 (hwnd);
                  if (pData->dwStyle & IRREGULAR)
                  {
-                     SendMessage (GetParent (hwnd), BUTTON_KEYUP, GetDlgCtrlID (hwnd), hwnd);
+                     SendMessage (GetParent (hwnd), BUTTON_KEYUP, (WPARAM)GetDlgCtrlID (hwnd), (LPARAM)hwnd);
                      break;
                  }
 

@@ -11,7 +11,8 @@ extern "C" {
 
 typedef struct _ANIMATE ANIMATE;
 
-typedef void (*DRAW_ANIMATE) (HDC hdc, ANIMATE* ani );
+typedef void (*DRAW_ANIMATE) (HDC hdc, ANIMATE* ani, void* context);
+typedef void (*CALC_ANIMATE) (ANIMATE* ani, int index, void* context);
 
 #define DEF_DRAW_ANIMATE NULL
 #define DEF_ALPHA_DRAW_BITMAP (DRAW_ANIMATE)(1)
@@ -135,7 +136,7 @@ struct _ANIMATE_SENCE{
 	void * param;
 };
 
-#define DrawAnimate(as, a) (as)->drawAnimate(as->hdc, a)
+#define DrawAnimate(as, a, param) (as)->drawAnimate(as->hdc, a, param)
 
 
 
@@ -193,14 +194,17 @@ TIME_LINE * GetTimeLineByID(ANIMATE_SENCE* as, int id);
 void TLMoveTo(TIME_LINE* tl, ANIMATE* a, int x1, int y1, int frame_num);
 void TLScaleTo(TIME_LINE* tl, ANIMATE* a, int w1, int h1, int frame_num);
 void TLAlphaTo(TIME_LINE* tl, ANIMATE* a, int a1,int frame_num);
+void TLUserSelfTo(TIME_LINE* tl, ANIMATE* a, CALC_ANIMATE calc_animate, 
+        void* context, int frame_num);
 void TLRun(TIME_LINE* tl, int frame_num);
 void TLWait(TIME_LINE* tl, int frame_num);
 void TLLoop(TIME_LINE* tl);
 
 enum tlStepType{
-	tlstMove = 0x01,
-	tlstScale = 0x02,
-	tlstAlpha = 0x04
+    tlstMove  = 0x01,
+    tlstScale = 0x02,
+    tlstAlpha = 0x04,
+    tlstUserSelf = 0x08
 };
 void TLStopAnimateStep(TIME_LINE* tl, ANIMATE* a, int type,BOOL finish_animate);
 

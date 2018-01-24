@@ -31,6 +31,7 @@
 #include "libime/ime.h"
 #include "libime/mgpti.h"
 #include "softkeywindow.h"
+#include "softkeyboard/common.h"
 #include "softkeyboard/softkeyboard.h"
 #include "common_animates/common_animates.h"
 //#include "animate.h"
@@ -129,7 +130,7 @@ static key_board_t *init_keyboard_data (HWND hWnd)
     return keyboard[0];
 }
 
-static destroy_key_win (void)
+static void destroy_key_win (void)
 {
 	//FIXME:
     destroy_en_keyboard (keyboard[0]);
@@ -155,7 +156,9 @@ static void on_imewnd_jmp_finished(ANIMATE_SENCE* as)
 	}
 }
 
-static int SoftKeyWinProc (HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
+extern HWND CreateToolTip (HWND host);
+
+static LRESULT SoftKeyWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     SOFTKBD_DATA* pdata;
 
@@ -250,9 +253,9 @@ static int SoftKeyWinProc (HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
             return 0;
             
         case MSG_IME_GETTARGET:
-            return (int)pdata->target_hwnd;
+            return (LRESULT)pdata->target_hwnd;
 		case MSG_IME_GETSTATUS:
-            return (int)pdata->is_opened;
+            return (LRESULT)pdata->is_opened;
 		case MSG_KEYDOWN: 
 		case MSG_KEYUP: 
 		{ 
@@ -297,7 +300,7 @@ static int SoftKeyWinProc (HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
                             pdata->keyboard = keyboard[pdata->current_board_idx];
                             
                             SendMessage (hWnd, MSG_ERASEBKGND, 0, 0L);
-							reset();
+							skb_reset();
                             return 0;
                         }
                     case AC_SEND_EN_STRING:
@@ -340,7 +343,6 @@ static int SoftKeyWinProc (HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
                 do {
                     view_window_t*   view_window   = pdata->keyboard->view_window;
                     stroke_window_t* stroke_window = pdata->keyboard->stroke_window; 
-                    vw_element_t* e = view_window->elements;
                     if(view_window == NULL || stroke_window == NULL)
                         break;
                     view_window->style |= VW_DRAW_ELMTS;

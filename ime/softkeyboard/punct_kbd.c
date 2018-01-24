@@ -5,6 +5,8 @@
 */
 
 #include "common.h"
+#include "../libime/ime.h"
+#include "../libime/mgpti.h"
 
 #ifdef KBD_TOOLTIP
 #include "tooltip.h"
@@ -141,7 +143,7 @@ int init_punct_keyboard (HWND hWnd, key_board_t *kb)
     kb->close_rc.right  = SKB_CLOSE_R;
     kb->close_rc.bottom = SKB_CLOSE_B;
 
-    kb->view_window == NULL;
+    kb->view_window = NULL;
     kb->stroke_window = NULL;
     
     /*initalize for key window.*/

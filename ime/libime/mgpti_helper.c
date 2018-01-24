@@ -26,9 +26,9 @@ static const char* digit_letters_map [] = {
     "wxyz",
 };
 
-inline static int does_letter_match_keystoke (char letter, char keystoke)
+static inline int does_letter_match_keystoke (char letter, char keystoke)
 {
-    return (int) strchr (digit_letters_map [keystoke - '2'], tolower (letter));
+    return (strchr (digit_letters_map [keystoke - '2'], tolower (letter)) != NULL);
 }
 
 int _pti_does_word_match_keystokes (const char* word, const char* keystokes)

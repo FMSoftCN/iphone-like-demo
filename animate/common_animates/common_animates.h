@@ -37,5 +37,8 @@ void RunJumpWindow(HWND hwnd, int x_begin, int y_begin, int x_end, int y_end, in
 void StartAlphaAnimate (int interval, int all_times, HDC hdc, 
         const BITMAP* bitmap, const RECT* rc, int start_alpha, int end_alpha);
 
+void RunCommonAnimate(HDC hdc, RECT* rc, PBITMAP pbmp, CALC_ANIMATE calc_animate, 
+        ANIMATE_OPS *ops, int frame_num, void *user_param);
+
 #endif
 

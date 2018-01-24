@@ -48,7 +48,7 @@ static BITMAP backbitmap;
 static BITMAP digibitmap;
 static WATCH_INFO g_watch;
 
-static get_current_time()
+static void get_current_time(void)
 {
     time_t timep;
     struct tm *p;
@@ -94,7 +94,7 @@ static void draw_time(HDC hdc)
             10, RECTH(g_watch.sL), 0, RECTH(g_watch.sL), &digibitmap, g_watch.secL*W_DIGI_W, 0);
 }
 
-static int WatchWinProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
+static LRESULT WatchWinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     HDC hdc;
     switch (message) {
@@ -119,19 +119,11 @@ static int WatchWinProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
         case MSG_ERASEBKGND:
             hdc = (HDC)wParam;
             const RECT* clip = (const RECT*) lParam;
-            BOOL fGetDC = FALSE, fSecondary = TRUE;
+            BOOL fGetDC = FALSE;
             RECT rcTemp;
 
             if (hdc == 0) {
-#if 0
-                if ((hdc = GetSecondaryDC(hWnd)) == HDC_SCREEN) {
-                    hdc = GetClientDC(hWnd);
-                    fSecondary = FALSE;
-                }
-                //hdc = GetClientDC (hWnd);
-#else
                 hdc = GetSecondaryClientDC(hWnd);
-#endif
                 fGetDC = TRUE;
             }
 
@@ -144,14 +136,7 @@ static int WatchWinProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
 
             FillBoxWithBitmap(hdc, 0, 0, 0, 0, &backbitmap);
             if (fGetDC){
-#if 0
-                if (fSecondary)
-                    ReleaseSecondaryDC(hWnd, hdc);
-                else
-                    ReleaseDC (hdc);
-#else
                 ReleaseSecondaryDC(hWnd, hdc);
-#endif
             }
             return 0;
         case MSG_TIMER:

@@ -37,7 +37,7 @@ typedef struct {
     char magic_number[sizeof(MAGIC_NUMBER)];    /* magic number */
     char ename[CIN_ENAME_LENGTH];               /* ascii name */
     char cname[CIN_CNAME_LENGTH];               /* prompt */
-    char selkey[SELECT_KEY_LENGTH];             /* select keys */
+    char selkey[SELECT_KEY_LENGTH + 1];             /* select keys */
 
     char last_full;         /* last full code need a more SPACE? */
     int TotalKey;           /* number of keys needed */

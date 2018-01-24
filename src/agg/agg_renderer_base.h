@@ -137,6 +137,18 @@ namespace agg
                 }
             }
         }
+
+        void clear_clip_box (const color_type& c)
+        {
+            unsigned y;
+            if(width())
+            {
+                for(y = 0; y < height(); y++)
+                {
+                    m_ren->copy_hline(0, y, width(), c);
+                }
+            }
+        }
           
 
         //--------------------------------------------------------------------

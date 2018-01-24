@@ -15,7 +15,8 @@
 #include "picture.h"
 #include "../sharedbuff.h"
 #include "common_animates/common_animates.h"
-#include <agg_coverflow.h>
+#include "agg_coverflow.h"
+#include "agg_scroll.h"
 
 #define SCR_W         240
 #define SCR_H         320
@@ -37,7 +38,7 @@ static int g_maxframe = 0;
 static BOOL scroll_dir = TRUE;
 static BITMAP g_stBitmap;
 
-static void DrawAnimateDefault (HDC hdc, ANIMATE* pAnimate)
+static void DrawAnimateDefault (HDC hdc, ANIMATE* pAnimate, void* context)
 {
     static int step = 1;
     if (GetAnimateW (pAnimate) != 0 && GetAnimateH (pAnimate) != 0) 
@@ -47,7 +48,7 @@ static void DrawAnimateDefault (HDC hdc, ANIMATE* pAnimate)
         else
             g_nTestFlame --;
 
-        unsigned int tick_count = GetTickCount ();
+        //DWORD tick_count = GetTickCount ();
         if (g_nTestFlame > 5) {
             step = 1;
             ScrollPageFlame (g_nTestFlame, &g_stBitmap, HDC_SCREEN);
@@ -65,21 +66,28 @@ static void DrawBKGDefault (HDC hdc, const RECT* pRect, void* pParam)
     //do nothing
 }
 
+/*
+static char* g_pBitmapName [] = {};
+static BOOL g_bCoverFlow = TRUE;
+
 static void DrawEndFrameDefault (ANIMATE_SENCE* pAnimateSence)
 {
     if (pAnimateSence != NULL)
     {
     }
 }
+*/
 
 void ScrollPictureAnimate(HDC hdc, BOOL dir, int frame_num)
 {
-    int w, h;
     BITMAP bmp;
     const RECT rt = {0, 0, SCR_W, SCR_H};
 
+#if 0
+    int w, h;
     w = RECTW(rt);
     h = RECTH(rt);
+#endif
 
     PUSH_PULL_OBJ objs[] ={
         {&bmp, 0, 0, 0, 0},
@@ -108,7 +116,7 @@ void ScrollPictureAnimate(HDC hdc, BOOL dir, int frame_num)
     RunPushPullAnimate(hdc, &rt, objs, 1, &stAnimateOps, frame_num, NULL);
 }
 
-static BMP_NODE *create_bmp_node()
+static BMP_NODE *create_bmp_node(void)
 {
     BMP_NODE *node = malloc(sizeof(BMP_NODE));
     if (node) {
@@ -118,14 +126,14 @@ static BMP_NODE *create_bmp_node()
     return NULL;
 }
 
-static void init_global_node_list()
+static void init_global_node_list(void)
 {
     memset(&g_nl, 0, sizeof(NODE_LIST));
     g_nl.isViewList = TRUE;
     g_nl.scale = 100;
 }
 
-static void load_bitmap_from_directory()
+static void load_bitmap_from_directory(void)
 {
     DIR * dir;
     struct dirent * ptr;
@@ -225,7 +233,6 @@ static void draw_bitmap_in_single_mode(HDC hdc)
 #if 1
     if (g_nl.scale == 100)
     {
-        BITMAP bkbmp;
         RECT rc = g_rcScr;
         rc.left   = g_nl.boxX;
         rc.top    = g_nl.boxY;
@@ -253,7 +260,7 @@ static void draw_bitmap(HDC hdc)
         draw_bitmap_in_single_mode(hdc);
 }
 
-static free_bitmap()
+static void free_bitmap(void)
 {
     BMP_NODE *node = g_nl.beginNode;
     g_nl.count = 0;
@@ -268,11 +275,11 @@ static free_bitmap()
 static void change_view_mode(HWND hWnd, LPARAM lParam)
 {
     if (g_nl.isViewList) {
+#ifndef _TARGET_IPAQ
+        int index = ReturnCurCoverFlowIndex ();
+#else
         int col = LOSWORD (lParam)/(IPHONE_MAIN_WIDTH/PIC_MAIN_COL);
         int row = HISWORD (lParam)/(IPHONE_MAIN_HEIGHT/PIC_MAIN_ROW);
-#ifndef _TARGET_IPAQ
-        int index = ReturnCurCoverFlowIndex ();//(row+g_nl.rowOffset) * PIC_MAIN_COL + col;
-#else
         int index = (row+g_nl.rowOffset) * PIC_MAIN_COL + col;
 #endif
         BMP_NODE *node = find_node_by_index(index);
@@ -288,7 +295,6 @@ static void change_view_mode(HWND hWnd, LPARAM lParam)
     } else {
 #if 1
         {
-            BITMAP bkbmp;
             BITMAP fgbmp;
             RECT rc = g_rcScr;
             int box_w = g_nl.curNode->icon.bmWidth;
@@ -443,7 +449,6 @@ void iPAQRollPage(BOOL dir)
 
 void RollPage(BOOL dir, int frame_num)
 {
-    BITMAP srcbmp;
 
     if (dir){
         if (g_nl.curNode->next) {
@@ -476,6 +481,7 @@ void RollPage(BOOL dir, int frame_num)
 
 
 #if 0
+    BITMAP srcbmp;
     memset(&srcbmp, 0, sizeof(BITMAP));
     GetBitmapFromDC (HDC_SCREEN, 0, 0, SCR_W, SCR_H, &srcbmp);
 
@@ -506,10 +512,8 @@ void RollPage(BOOL dir, int frame_num)
     ScrollPictureAnimate(HDC_SCREEN, dir, frame_num);
 #endif
 }
-static char* g_pBitmapName [] = {};
-static BOOL g_bCoverFlow = TRUE;
 
-static int PicWinProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
+static LRESULT PicWinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     HDC hdc;
     switch (message) {

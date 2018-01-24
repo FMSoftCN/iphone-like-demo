@@ -9,6 +9,8 @@
 #ifndef __PTI_H
 	#define __PTI_H
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif  /* __cplusplus */
@@ -118,8 +120,8 @@ int ptiSaveUserWord (const char* user_word);
  *
  * When there is no further result, the function return -1.
  */
-int ptiMatchKeystokes (const char* keystokes, char* buff, int buff_len, 
-        int cursor, int case_mode); 
+intptr_t ptiMatchKeystokes (const char* keystokes, char* buff, int buff_len, 
+        intptr_t cursor, int case_mode); 
 
 #if defined(__GNUC__)
 #ifdef _DEBUG_MSG

@@ -891,7 +891,114 @@ namespace agg
         }
     };
 
+    //===============================================span_image_filter_rgb555_nn
+    template<class Source, class Interpolator> 
+    class span_image_filter_rgb555_nn : 
+        public span_image_filter<Source, Interpolator>
+    {
+    public:
+        typedef Source source_type;
+        typedef typename source_type::color_type color_type;
+        typedef typename source_type::order_type order_type;
+        typedef Interpolator interpolator_type;
+        typedef span_image_filter<source_type, interpolator_type> base_type;
+        typedef typename color_type::value_type value_type;
+        typedef typename color_type::calc_type calc_type;
+        enum base_scale_e
+        {
+            base_shift = color_type::base_shift,
+            base_mask  = color_type::base_mask
+        };
 
+        //--------------------------------------------------------------------
+        span_image_filter_rgb555_nn() {}
+        span_image_filter_rgb555_nn(source_type& src, 
+                                 interpolator_type& inter) :
+            base_type(src, inter, 0) 
+        {}
+        span_image_filter_rgb555_nn(source_type& src, 
+                                 interpolator_type& inter,
+                                 const image_filter_lut& filter) :
+            base_type(src, inter, 0) 
+        {}
+
+        //--------------------------------------------------------------------
+        void generate(color_type* span, int x, int y, unsigned len)
+        {
+            base_type::interpolator().begin(x + base_type::filter_dx_dbl(), 
+                                            y + base_type::filter_dy_dbl(), len);
+            do
+            {
+                base_type::interpolator().coordinates(&x, &y);
+                const value_type* fg_ptr = (const value_type*)
+                    base_type::source().span(x >> image_subpixel_shift, 
+                                             y >> image_subpixel_shift, 
+                                             1);
+                span->r = ((*fg_ptr)>>7) & 0xF8;
+                span->g = ((*fg_ptr)>>2) & 0xF8;
+                span->b = ((*fg_ptr)<<3) & 0xF8;
+                span->a = base_mask;
+                ++span;
+                ++base_type::interpolator();
+
+            } while(--len);
+        }
+    };
+    //===============================================span_image_filter_rgb565_nn
+    template<class Source, class Interpolator> 
+    class span_image_filter_rgb565_nn : 
+        public span_image_filter<Source, Interpolator>
+    {
+    public:
+        typedef Source source_type;
+        typedef typename source_type::color_type color_type;
+        typedef typename source_type::order_type order_type;
+        typedef Interpolator interpolator_type;
+        typedef span_image_filter<source_type, interpolator_type> base_type;
+        typedef typename color_type::value_type value_type;
+        typedef typename color_type::calc_type calc_type;
+        enum base_scale_e
+        {
+            base_shift = color_type::base_shift,
+            base_mask  = color_type::base_mask
+        };
+
+        //--------------------------------------------------------------------
+        span_image_filter_rgb565_nn() {}
+        span_image_filter_rgb565_nn(source_type& src, 
+                                 interpolator_type& inter) :
+            base_type(src, inter, 0) 
+        {}
+        span_image_filter_rgb565_nn(source_type& src, 
+                                 interpolator_type& inter,
+                                 const image_filter_lut& filter) :
+            base_type(src, inter, 0) 
+        {}
+
+        //--------------------------------------------------------------------
+        void generate(color_type* span, int x, int y, unsigned len)
+        {
+            base_type::interpolator().begin(x + base_type::filter_dx_dbl(), 
+                                            y + base_type::filter_dy_dbl(), len);
+            do
+            {
+                base_type::interpolator().coordinates(&x, &y);
+                const value_type* fg_ptr = (const value_type*)
+                    base_type::source().span(x >> image_subpixel_shift, 
+                                             y >> image_subpixel_shift, 
+                                             1);
+
+                int16u tmp = fg_ptr[1] << 8 | fg_ptr[0];
+                span->r = (tmp>>8) & 0xF8;
+                span->g = (tmp>>3) & 0xFC;
+                span->b = (tmp<<3) & 0xF8;
+                span->a = base_mask;
+                ++span;
+                ++base_type::interpolator();
+
+            } while(--len);
+        }
+    };
 }
 
 

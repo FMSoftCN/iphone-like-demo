@@ -1,11 +1,11 @@
 #ifndef AGG_SCROLL_INCLUDE
 #define AGG_SCROLL_INCLUDE
 
+#include <minigui/common.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <minigui/common.h>
 
 BOOL InitScrollPage (HDC hUpLayerDC, HDC hDownLayerDC, int nWidth, int nHeight, int nFlame);
 BOOL InitRollPage (PBITMAP psrcbmp, PBITMAP pbmp, int nWidth, int nHeight, int nFlame);

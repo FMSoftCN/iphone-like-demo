@@ -27,7 +27,7 @@ static ime_callback ime_method = NULL;
 static char stroke[SW_STR_LEN] = {0};
 static int mode = PTI_CASE_abc; 
 
-void reset()
+void skb_reset()
 {
 	index_curr = 0;
 	index_next = 0;
@@ -84,15 +84,6 @@ void strcpylower(char* buf, const char* str)
 	}
 
 	*buf = 0;
-}
-
-inline BOOL hit_rect(RECT rect, POINT p)
-{
-	if(p.x >= rect.left && p.x <= rect.right
-			&& p.y >= rect.top && p.y <= rect.bottom)
-		return TRUE;
-
-	return FALSE;
 }
 
 void vw_proceed_hit(HWND hwnd, view_window_t* view_window,
@@ -699,14 +690,12 @@ static void symbol_kw_proceed_hit(HWND hwnd, view_window_t* view_window,
 }
 
 
-int symbol_proc_msg (key_board_t* key_board, HWND hwnd, 
-        int message, WPARAM wParam, LPARAM lParam)
+LRESULT symbol_proc_msg (key_board_t* key_board, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     static md_key_t *key_down;
 	static int lbuttondown = 0;
 	static POINT p;
     md_key_t *key;
-    DWORD key_flags ;
 
 	switch(message) {
 		case MSG_LBUTTONDOWN: /* highlight key */
@@ -895,7 +884,6 @@ void vw_set_elements (struct _view_window_t* view_window, HWND hwnd)
 {
     int i;
     HDC hdc = GetDC(hwnd);
-    PLOGFONT oldfont;
 
 	RECT r = view_window->bound;
 	r.left = view_window->key_pg_up.right;
@@ -905,7 +893,7 @@ void vw_set_elements (struct _view_window_t* view_window, HWND hwnd)
 		view_window->clear_elements(view_window);
 
     for (i = 0; i < view_window->element_num; i++ ) {
-        oldfont = SelectFont(hdc, view_window->view_font);
+        SelectFont(hdc, view_window->view_font);
         get_word (view_window->buffer, i, &view_window->elements[i]);
         get_substr_pos_ex (hdc, view_window->buffer,
 				&view_window->elements[i], 

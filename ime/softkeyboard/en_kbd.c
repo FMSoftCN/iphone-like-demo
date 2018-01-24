@@ -13,12 +13,13 @@
 
 #include "common.h"
 #include "../libime/ime.h"
+#include "../libime/mgpti.h"
 
 #ifdef KBD_TOOLTIP
 #include "tooltip.h"
 #endif
 
-static char fontname[32] = {0};
+//static char fontname[32] = {0};
 
 static void make_font(void)
 {
@@ -117,8 +118,8 @@ static void kw_update (key_window_t *kw, HWND hWnd)
 static void sw_update (stroke_window_t *sw, HWND hWnd)
 {
     HDC hdc;
-    PLOGFONT old_font;
-    gal_pixel old_tecolor;
+    //PLOGFONT old_font;
+    //gal_pixel old_tecolor;
 
     EraseBbGround(hWnd, &sw->bound);
     if (strlen(sw->str) != 0)
@@ -126,11 +127,11 @@ static void sw_update (stroke_window_t *sw, HWND hWnd)
         hdc = GetDC(hWnd);
         
         SetBkMode (hdc, BM_TRANSPARENT);
-        old_tecolor = SetTextColor (hdc, PIXEL_lightwhite);
-        old_font = SelectFont(hdc, sw->stroke_font);
+        /*old_tecolor = */SetTextColor (hdc, PIXEL_lightwhite);
+        /*old_font = */SelectFont(hdc, sw->stroke_font);
         DrawText (hdc, sw->str, -1, &(sw->bound), DT_LEFT);
         //SelectFont(hdc, old_font);
-        SetTextColor(hdc, old_tecolor);
+        //SetTextColor(hdc, old_tecolor);
         
         ReleaseDC(hdc);
     }
@@ -156,7 +157,6 @@ static void vw_update (view_window_t *vw, HWND hWnd, vw_element_t* element)
     PBITMAP pbmp;
 	static int old_style = 0;
 	HDC hdc = GetDC(hWnd);
-	RECT rc;
     PLOGFONT oldfont;
 
 	r.left = vw->key_pg_up.right;
@@ -173,6 +173,7 @@ static void vw_update (view_window_t *vw, HWND hWnd, vw_element_t* element)
 
 			for(i=0; i<vw->element_num; i++) {
 #ifndef __FILL_DIRECT__ 
+	            RECT rc;
 				SetTextColor(hdc, RGB2Pixel(hdc, 190, 190, 190));
 				DrawText(hdc, element[i].string, -1, &element[i].bound, 0);
 
@@ -259,9 +260,8 @@ static void vw_update (view_window_t *vw, HWND hWnd, vw_element_t* element)
     ReleaseDC(hdc);
 }
 
-static int en_proc_msg (key_board_t* key_board, HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
+static LRESULT en_proc_msg (key_board_t* key_board, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    static md_key_t *key_down;
 	static int lbuttondown = 0;
 	static POINT p;
     md_key_t *key;
@@ -291,7 +291,6 @@ static int en_proc_msg (key_board_t* key_board, HWND hwnd, int message, WPARAM w
                 kw_proceed_hit(hwnd, key_board->view_window,
 						key_board->stroke_window, key, &key_board->action,
 						TRUE, p, EN, key_board->ime, wParam, lParam);
-                key_down = key;
 				
                 break;
 			}
@@ -333,7 +332,6 @@ static int en_proc_msg (key_board_t* key_board, HWND hwnd, int message, WPARAM w
 						FALSE, p, EN, key_board->ime, wParam, lParam);
 				break;
 			}
-            key_down = NULL;
 			break;
 
 		case MSG_MOUSEMOVE:

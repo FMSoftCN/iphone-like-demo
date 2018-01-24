@@ -232,7 +232,7 @@ static int display_led_digits (HDC hdc, int x, int y,
 }
 
 
-inline void calc_InvalidDiaplayRect(HWND hwnd) 
+static inline void calc_InvalidDiaplayRect(HWND hwnd) 
 {
     RECT rc;
     
@@ -300,7 +300,7 @@ static int GetIDCtrlFromPos(int cur_row, int cur_col)
     return 0;
 }
 
-/*坐标》按钮上的字*/
+#if 0
 static int GetCaptFromPos (int cur_row, int cur_col, char *caption)
 {
     if (!caption)
@@ -318,7 +318,7 @@ static int GetCaptFromPos (int cur_row, int cur_col, char *caption)
     return 0;
 }
 
-static BOOL change_tab(lParam)
+static BOOL change_tab(LPARAM lParam)
 {
     int selectX = LOSWORD (lParam);
     int selectY = HISWORD (lParam);
@@ -329,6 +329,7 @@ static BOOL change_tab(lParam)
 
     return FALSE;
 }
+#endif
 
 static BOOL validate_select(LPARAM lParam)
 {
@@ -534,6 +535,7 @@ int DecideSize (void)
     return 0;
 }
 
+#if 0
 /* 
  * TextOutCenter: Output string in the center of a rectangle.
  * Params       : hdc - the handle of  device context
@@ -549,7 +551,7 @@ static void TextOutCenter (HDC hdc, RECT* prcText, char* pchText)
     if (pchText) DrawText (hdc, pchText, -1, prcText, DT_SINGLELINE|DT_VCENTER|DT_CENTER|DT_NOCLIP);
     SetBkMode (hdc, bkMode);
 }
-#if 0
+
 /*
  * DrawButton: draw the button. 
  *			  called when the button is pressed and loosen
@@ -586,9 +588,9 @@ static void  DrawButton (HDC hdc, RECT *prcBtn, int status)
         LineTo (hdc, prcBtn->left + w + 1, prcBtn->bottom + 1);
     }
 }
-#endif
+
 static int GetCaptFromPos (int cur_row, int cur_col, char *caption);
-#if 0
+
 static void HiliteButton (HDC hdc, int cur_row, int cur_col)
 {
     RECT rcDown, rcText;
@@ -680,7 +682,7 @@ void show_var (HWND hwnd)
         } else {
             char buff[EFF_NUM + 5];
             sprintf (buff, "%d", (int) abs_last_opnd);  // to do 
-            sprintf (outformat, "%%.%df", EFF_NUM - strlen (buff));
+            sprintf (outformat, "%%.%df", (int)(EFF_NUM - strlen (buff)));
         }
         sprintf (calc_strdisp, outformat, last_opnd);
         clearzero (calc_strdisp);
@@ -845,24 +847,19 @@ void enter_key(HWND hwnd)
 {
     int keyId = GetIdFromPos(g_curRow, g_curCol);
     /*drawed button*/
-    if (keyId > 0)
-    {
+    if (keyId > 0) {
         deal_with_special_button(keyId, hwnd);
         //HiliteButton (hdc, g_curRow, g_curCol);
         InputProc(hwnd, keyId);
     }
     /*control button*/
-    else
-	{
+    else {
 		int idc = GetIDCtrlFromPos(g_curRow, g_curCol);
-		int hbtn = GetDlgItem(hwnd, idc);
-		if (idc == IDC_BTN_BASE || idc == IDC_BTN_ANG) 
-		//		idc == IDC_BTN_EXIT)
-		{
+		HWND  hbtn = GetDlgItem(hwnd, idc);
+		if (idc == IDC_BTN_BASE || idc == IDC_BTN_ANG) {
 			SendMessage(hbtn, BM_CLICK, 0, 0);
 		}
-		else
-		{
+		else {
 			if (SendMessage(hbtn, BM_GETCHECK, 0, 0) == BST_CHECKED)
 			{
 				SendMessage(hbtn, BM_SETCHECK, BST_UNCHECKED, 0);
@@ -926,7 +923,7 @@ void trans_status(HWND hWnd)
     UpdateWindow (hWnd, TRUE);
 }
 
-static int CalcWinProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
+static LRESULT CalcWinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     HDC hdc;
 
@@ -1006,6 +1003,7 @@ static int CalcWinProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
                 UnloadBitmap (&bmpBk);
                 UnloadBitmap (&bmpBkClick);
                 DeleteMemDC (memDC);
+                calcOnDestroy (hWnd);
                 DestroyAllControls ( hWnd );
                 DestroyMainWindow ( hWnd );
                 PostQuitMessage (hWnd);

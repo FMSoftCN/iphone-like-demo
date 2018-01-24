@@ -109,7 +109,7 @@ int wifi_get_wireless_interface_name (char* name, int* number)
    ifr = ifc.ifc_req;
    *number = 0;
    name[0] = '\0';
-   printf ("WiFi ifc.ifc_len / sizeof (struct ifreq) %d\n", ifc.ifc_len / sizeof (struct ifreq));
+   printf ("WiFi ifc.ifc_len / sizeof (struct ifreq) %ld\n", ifc.ifc_len / sizeof (struct ifreq));
    
    for (i = ifc.ifc_len / sizeof (struct ifreq); --i >= 0; ifr++)
    {
@@ -425,6 +425,7 @@ int wifi_get_wireless_interface_info (char* interface_name, struct wireless_info
 
 void wifi_using_dhcp (char* interface_name)
 {
+/*
    char cmd[256];
    memset (cmd, 0x0, 256);
    system ("killall udhcpc");
@@ -435,20 +436,24 @@ void wifi_using_dhcp (char* interface_name)
    sprintf (cmd, "udhcpc -b -p /var/run/udhcpc.%s.pid -i %s", interface_name, interface_name);
    //system ("udhcpc -b -p /var/run/udhcpc.wlan0.pid -i wlan0");
    system (cmd);
+*/
 }
 
 void wifi_set_gateway(char *gateway)
 {
+/*
    char * exec = NULL;
    asprintf(&exec, "route add default gw %s", gateway);
    system(exec);
    free(exec);
+*/
 }
 
 void wifi_add_dns(char *dns)
 {
    char *exec = NULL;
-   asprintf(&exec, "nameserver %s", dns);
+   if (asprintf(&exec, "nameserver %s", dns) < 0)
+        return;
    dns_append_line(exec, strlen(exec), NULL);
    free(exec);
 }
@@ -456,7 +461,9 @@ void wifi_add_dns(char *dns)
 void wifi_set_search(char *search)
 {
    char *exec = NULL;
-   asprintf(&exec, "search %s", search);
+   if (asprintf(&exec, "search %s", search) < 0)
+        return;
+
    dns_append_line(exec, strlen(exec), NULL);
    free(exec);
 }
@@ -485,7 +492,12 @@ static int dns_append_line(const char* line, int len, int* exists)
         goto EXIT;
     }
 
-    fread(buf, st.st_size, 1, fp);
+    if (fread(buf, st.st_size, 1, fp) < 1) {
+        ret = -4;
+        printf ("read error!\n");
+        goto EXIT;
+    }
+
     substr = strcasestr(buf, line);
     if (substr) {
         ret = substr - buf;
@@ -531,7 +543,12 @@ int wifi_get_string_search (char* string, char *name, int* number)
         goto EXIT;
     }
 
-    fread(buf, st.st_size, 1, fp);
+    if (fread(buf, st.st_size, 1, fp) < 1) {
+        ret = -4;
+        printf ("read error!\n");
+        goto EXIT;
+    }
+
     pmove = buf;
 
     while (pmove)
@@ -625,21 +642,22 @@ int wifi_enum_devices (char* name, int* number)
 {
     char	buff[1024];
     FILE *	fh;
-    struct ifconf ifc;
-    struct ifreq *ifr;
-    int		i;
     
     fh = fopen(PROC_NET_WIRELESS, "r");
 
-    if (fh != NULL)
-    {
+    if (fh != NULL) {
 
-        fgets(buff, sizeof(buff), fh);
-        fgets(buff, sizeof(buff), fh);
+        if (fgets(buff, sizeof(buff), fh) == NULL) {
+            fclose (fh);
+            return -1;
+        }
+        if (fgets(buff, sizeof(buff), fh) == NULL) {
+            fclose (fh);
+            return -1;
+        }
 
       /* Read each device line */
-        while(fgets(buff, sizeof(buff), fh))
-	    {
+        while(fgets(buff, sizeof(buff), fh)) {
 	        //char	name[IFNAMSIZ + 1];
 	        char *s;
 
@@ -651,14 +669,11 @@ int wifi_enum_devices (char* name, int* number)
 	        /* Extract interface name */
 	        s = wifi_get_ifname(name, IFNAMSIZ + 1, buff);
 
-	        if(!s)
-	        {
+	        if(!s) {
 	            fprintf(stderr, "Cannot parse " PROC_NET_WIRELESS "\n");
 	        }
-            else
-            {
-                while ((*name) != '\0')
-                {
+            else {
+                while ((*name) != '\0') {
                     name ++;
                 }
                 name ++;

@@ -60,7 +60,19 @@ extern RECT         calc_rcArrow;
 extern int          DecideSize (void);
 extern void         show_var (HWND hwnd);        
 extern void         show_digit_stack(HWND hwnd);
-extern inline void  calc_InvalidDiaplayRect(HWND hwnd);
+
+static inline void calc_InvalidDiaplayRect(HWND hwnd) 
+{
+    RECT rc;
+    
+    rc.left     = CALC_DISPLAY_L;
+    rc.right    = CALC_DISPLAY_R;
+    rc.top      = CALC_DISPLAY_T;
+    rc.bottom   = CALC_DISPLAY_B;
+
+    InvalidateRect(hwnd, &rc, TRUE);
+}
+
 
 static BOOL IsBinary (int btid)
 {
@@ -481,7 +493,7 @@ int longint_bin (char *out_str, long amount, int max_digits)
     char work_str[(sizeof(amount) * 8) + 1];
     int  work_char = 0, lead_zero = 1, lead_one = 1, lead_one_count = 0,
          work_size = sizeof(amount) * 8;
-    unsigned long bit_mask = (1 << ((sizeof(amount) * 8) - 1));
+    unsigned long bit_mask = (1 << ((4 * 8) - 1));
 
     while (bit_mask) {
 

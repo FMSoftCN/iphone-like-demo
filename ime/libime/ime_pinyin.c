@@ -325,7 +325,6 @@ int pinyin_predict_pord(void *method, const char *lookfor, char * buffer, int bu
 {
     int    lenth = 0;
     static char lookfor_bk[4]; 
-    static int  page =0;
     
 
     lenth =0;
@@ -333,7 +332,6 @@ int pinyin_predict_pord(void *method, const char *lookfor, char * buffer, int bu
         sprintf (lookfor_bk, "%s", lookfor);
         bzero (seltab, 16*MAX_PHRASE_LENGTH);
         putstr ((unsigned char *)lookfor);
-        page =0;
     }
 
     buffer[0] = 0;

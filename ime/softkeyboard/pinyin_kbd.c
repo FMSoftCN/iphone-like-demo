@@ -13,12 +13,13 @@
 
 #include "common.h"
 #include "libime/ime.h"
+#include "libime/mgpti.h"
 
 #ifdef KBD_TOOLTIP
 #include "tooltip.h"
 #endif
 
-static char fontname[32] = {0};
+//static char fontname[32] = {0};
 
 static void make_font(void)
 {
@@ -144,15 +145,13 @@ static void vw_update (view_window_t *vw, HWND hWnd, vw_element_t* element)
     PBITMAP pbmp;
 	static int old_style = 0;
 	HDC hdc = GetDC(hWnd);
-	RECT rc;
-    PLOGFONT oldfont;
 
 	r.left = vw->key_pg_up.right;
 	r.top  = vw->bound.top;
 	r.right = vw->key_pg_down.left;
 	r.bottom = vw->bound.bottom;
 
-	oldfont = SelectFont(hdc, vw->view_font);
+	SelectFont(hdc, vw->view_font);
 	SetBkMode (hdc, BM_TRANSPARENT);
 	if(vw->style & VW_DRAW_ELMTS) {
 		if(element == NULL) {
@@ -160,6 +159,7 @@ static void vw_update (view_window_t *vw, HWND hWnd, vw_element_t* element)
             EraseBbGround(hWnd, &r);
 			for(i=0; i<vw->element_num; i++) {
 #ifndef __FILL_DIRECT__ 
+	            RECT rc;
 				SetTextColor(hdc, RGB2Pixel(hdc, 190, 190, 190));
 				DrawText(hdc, element[i].string, -1, &element[i].bound, 0);
 
@@ -241,14 +241,11 @@ static void vw_update (view_window_t *vw, HWND hWnd, vw_element_t* element)
 	}
 	
     old_style = vw->style;
-	//SelectFont(hdc, oldfont);
 	ReleaseDC(hdc);
 }
 
-int pinyin_proceed_msg(key_board_t* key_board, HWND hwnd,
-		int message, WPARAM wParam, LPARAM lParam) 
+LRESULT pinyin_proceed_msg(key_board_t* key_board, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 {
-	static RECT old_hit_rect; 
 	static int lbuttondown = 0;
 	static POINT p;
 

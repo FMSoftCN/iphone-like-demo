@@ -39,9 +39,12 @@ agg::rasterizer_scanline_aa<> g_Rasterizer;
 agg::scanline_p8 g_ScanLine;
 
 
+/*
 static double g_dMoveZ = 10.0;
 static double g_dMoveX = 10.0;
 static double g_dShiftRightMidX = 50.0;
+*/
+
 static bool g_bMoveDir = false;
 static bool g_bMoveCoverFlow = false;
 static double g_dScreenWidth;
@@ -70,11 +73,7 @@ typedef struct _ST_COVERFLOW_RECT
     double bottom;
 }ST_COVERFLOW_RECT;
 
-static ST_COVERFLOW_RECT g_stMidRect;
-
-
 typedef ST_COVERFLOW_NODE* ST_COVERFLOW_NODE_PT;
-
 
 static ST_COVERFLOW_NODE_PT g_pSTCoverFlowHead;
 static ST_COVERFLOW_NODE_PT g_pSTCoverFlowCur;
@@ -412,8 +411,6 @@ class CoverFlowClass : public agg::platform_support
         virtual void on_init()
         {
 
-            double dWidth = width () / 4;
-            double dHeight  = height () / 4;
             int i;
             m_CenterX = width () / 2;
             m_CenterY = height () / 2;
@@ -571,15 +568,12 @@ class CoverFlowClass : public agg::platform_support
                 agg::image_filter_bilinear filter_kernel;
                 agg::image_filter_lut filter(filter_kernel, false);
                 agg::span_allocator<color_type> sa;
-                ST_COVERFLOW_NODE_PT pCurNode;
                 int nRightNode;
                 int nLeftNode;
 
                 rb_screen.clear(agg::rgba(0, 0, 0));
 
                 int i;
-
-                pCurNode = g_pSTCoverFlowHead;
 
                 if (g_nRightNumber > 3)
                     nRightNode = 4;
@@ -1490,6 +1484,10 @@ agg::scanline_u8  g_scanline;
 
 CoverFlowClass g_CoverFlow (pix_format, flip_y);
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int ReturnCurCoverFlowIndex (void)
 {
     if (!g_pSTCoverFlowCur)
@@ -1548,11 +1546,11 @@ BOOL RegisterCoverFlowRes (char* pCoverFlowImg)
 {
     g_CoverFlow.load_img (g_nCoverFlowImg, pCoverFlowImg);
     g_nCoverFlowImg ++;
+    return TRUE;
 }
 
 BOOL StartUpCoverFlow (int nWidth, int nHeight)
 {
-    int i;
     //pString = (*pBitmapFile);
 
     if (!nWidth || !nHeight)
@@ -1616,3 +1614,6 @@ BOOL InitCoverFlow (char** pBitmapFile, int nCount, int nWidth, int nHeight)
     return TRUE;
 }
 
+#ifdef __cplusplus
+}
+#endif

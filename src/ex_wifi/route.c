@@ -7,16 +7,21 @@
  *Under the GPL licence
  */
 
-#include <asm/types.h>
-#include <netinet/ether.h>
-#include <netinet/in.h>
-#include <net/if.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <asm/types.h>
+
 #include <sys/socket.h>
 #include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <netinet/ether.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <net/if.h>
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
-#include <sys/types.h>
 
 #define BUFSIZE 8192
 

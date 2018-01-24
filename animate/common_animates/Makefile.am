@@ -1,7 +1,7 @@
 TOP_DIR=../..
 AM_CPPFLAGS=-I.. -I../../include
 
-lib_LTLIBRARIES=libcommon_animates.la
+noinst_LTLIBRARIES=libcommon_animates.la
 
 SRC_FILES=common_animates.c alpha_animate.c
 HDR_FILES=common_animates.h

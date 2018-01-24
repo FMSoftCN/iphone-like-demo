@@ -155,7 +155,7 @@ if test "x$devel_mode" = "xyes"; then
 fi
 
 if test "$ac_cv_prog_gcc" = "yes"; then
-    CFLAGS="$CFLAGS -O2 -Wstrict-prototypes -pipe"
+    CFLAGS="$CFLAGS -D_GNU_SOURCE -Wstrict-prototypes -pipe"
 fi
 
 AM_CONDITIONAL(COMPILE_MLSSHELL, test "x$build_mlsshell" = "xyes")

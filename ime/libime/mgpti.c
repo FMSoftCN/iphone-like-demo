@@ -181,8 +181,7 @@ static int copy_words_from_source (const char* source, char* buff,
     return copied;
 }
 
-static int 
-write_matched_words (char* buff, int buff_len, char* cursor, int case_mode)
+static intptr_t write_matched_words (char* buff, int buff_len, char* cursor, int case_mode)
 {
     int copied = 0;
 
@@ -203,7 +202,7 @@ write_matched_words (char* buff, int buff_len, char* cursor, int case_mode)
             cursor += copied;
 
             _MY_PRINTF ("write_matched_words: 1=%s\n", buff);
-            return (int)cursor;
+            return (intptr_t)cursor;
         }
     }
 
@@ -221,7 +220,7 @@ write_matched_words (char* buff, int buff_len, char* cursor, int case_mode)
 
     _MY_PRINTF ("write_matched_words: 2=%s\n", buff);
     if (buff [0])
-        return (int) cursor;
+        return (intptr_t) cursor;
 
     return -1;
 }
@@ -400,8 +399,8 @@ static void match_leading_word (void)
     }
 }
 
-int ptiMatchKeystokes (const char* keystokes, char* buff, int buff_len, 
-        int cursor, int case_mode) 
+intptr_t ptiMatchKeystokes (const char* keystokes, char* buff, int buff_len, 
+        intptr_t cursor, int case_mode) 
 {
     int nr_digits = strlen (keystokes);
 

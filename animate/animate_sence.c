@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <pthread.h>
+#include <sys/time.h>
+
 #include <minigui/common.h>
 #include <minigui/minigui.h>
 #include <minigui/gdi.h>
@@ -7,7 +9,7 @@
 
 #include "animate.h"
 
-static inline DWORD getcurtime()
+static inline DWORD getcurtime(void)
 {
 	struct timeval tv;
 	gettimeofday(&tv,NULL);
@@ -24,7 +26,7 @@ static void as_draw_one_frame(ANIMATE_SENCE *as, int skip_frame)
 	SelectClipRect(as->hdc, &as->rtArea);
 
 	//clear the bkgnd
-	(*as->draw_bkgnd)(as->hdc, &as->rtArea, as->param);
+	//(*as->draw_bkgnd)(as->hdc, &as->rtArea, as->param);
 
 	//caclue timeline
 	TIME_LINE* tl = as->timelines;
@@ -55,6 +57,9 @@ static void as_draw_one_frame(ANIMATE_SENCE *as, int skip_frame)
 		}
 	}
 
+	//clear the bkgnd
+	(*as->draw_bkgnd)(as->hdc, &as->rtArea, as->param);
+
 	//draw animates
 	
 	a = as->normal;
@@ -62,7 +67,7 @@ DRAW_ANIMATES:
 	h = a;
 	while(a){
 
-		DrawAnimate(as, a);
+		DrawAnimate(as, a, as->param);
 
 		a = a->next;
 		if(a == h)
@@ -160,6 +165,7 @@ DRAWALL:
 }
 
 
+#if 0 /* not used */
 static void defDrawAnimate(HDC hdc, ANIMATE* a)
 {
 	FillBoxWithBitmap(hdc, GetAnimateX(a), GetAnimateY(a), GetAnimateW(a),GetAnimateH(a),(BITMAP*)a->img);
@@ -189,6 +195,7 @@ static void defWindowDraw(HDC hdc, ANIMATE* a)
 	MoveWindow((HWND)a->img, GetAnimateX(a), GetAnimateY(a), GetAnimateW(a), GetAnimateH(a), TRUE);
 }
 
+#endif
 
 /////////////////////////////////////////////
 //APIs
@@ -457,8 +464,9 @@ int StartThreadAnimateSence (ANIMATE_SENCE* as)
 	return 0;
 }
 
-static BOOL as_timer_draw(ANIMATE_SENCE* as, int speed, DWORD dw)
+static BOOL as_timer_draw(HWND hwnd, LINT speed, DWORD dw)
 {
+    ANIMATE_SENCE* as = (ANIMATE_SENCE*)hwnd;
 	DWORD cur_time = getcurtime();
 
 	if(as->timelines == NULL || (as->normal == NULL && as->topmost == NULL) ||

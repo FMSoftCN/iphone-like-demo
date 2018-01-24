@@ -249,9 +249,9 @@ public:
                 break;
             }
         }
-        double tm = elapsed_time();
 
 #if 0
+        double tm = elapsed_time();
         char buf[128]; 
         agg::gsv_text t;
         t.size(10.0);
@@ -470,10 +470,10 @@ void Agg_Flip(HDC hdc, int interval)
 
 	int interval_sec;
 	int interval_nsec;
-    int total_time=(2+g_frame_num)*interval;
+    //int total_time=(2+g_frame_num)*interval;
 	struct timeval tv;
 	gettimeofday(&tv,NULL);
-	int start_time =tv.tv_sec*1000 + (tv.tv_usec+999)/1000;
+	//int start_time =tv.tv_sec*1000 + (tv.tv_usec+999)/1000;
 
 	pthread_cond_init(&cond,NULL);
 	pthread_mutex_init(&mutex, NULL);
@@ -486,7 +486,7 @@ void Agg_Flip(HDC hdc, int interval)
     {
 		struct timeval tv;
 		struct timespec timeout;
-		DWORD before_time/*, end_time*/;
+		//DWORD before_time, end_time;
 //		before_time = getcurtime();
 		gettimeofday(&tv, NULL);
 		timeout.tv_sec = tv.tv_sec + interval_sec;

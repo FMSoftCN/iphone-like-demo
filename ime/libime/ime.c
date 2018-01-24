@@ -32,7 +32,7 @@
 
 int cb_pti_init(void* filename)
 {
-	ptiInitialize (filename);
+	return ptiInitialize (filename);
 }
 
 int cb_pti_match_keystrokes(const char *strokes, char *buffer, int buffer_len, int index, int mode)
@@ -52,6 +52,6 @@ int cb_pinyin_predict_word(const char *strokes, char *buffer, int buffer_len, in
 
 int cb_pinyin_init(void* filename)
 {
-	ime_pinyin_init();
+	return ime_pinyin_init();
 }
 #endif

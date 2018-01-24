@@ -24,8 +24,7 @@
 //----------------------------------------------------------------------------
 
 #include <string.h>
-//#include "SDL.h"
-//#include "SDL_byteorder.h"
+
 extern "C" {
 #include <minigui/common.h>
 #include <minigui/minigui.h>
@@ -33,6 +32,7 @@ extern "C" {
 #include <minigui/window.h>
 #include <minigui/control.h>
 }
+
 #include "agg_platform_support.h"
 
 namespace agg
@@ -202,6 +202,9 @@ namespace agg
             m_bpp = 32;
             break;
 #endif
+        default:
+            _MG_PRINTF ("mGPlus>AGG: Not handled pixel format: %x.\n", m_format);
+            break;
         }
     }
 
@@ -213,7 +216,9 @@ namespace agg
         {
             if(m_surf_img[i]) 
             {
+#ifndef _MG_MINIMALGDI
                 UnloadBitmap(m_surf_img[i]);
+#endif
                 free(m_surf_img[i]);
                 m_surf_img[i]=NULL;
             }
@@ -372,10 +377,12 @@ namespace agg
         {
             int ret = FALSE;
 
+#ifndef _MG_MINIMALGDI
             if(m_specific->m_surf_img[idx]) 
                 UnloadBitmap(m_specific->m_surf_img[idx]);
             else
                 m_specific->m_surf_img[idx] = (PBITMAP)calloc(1, sizeof(BITMAP)); 
+#endif
 
             HDC tmpdc = CreateCompatibleDC(m_specific->m_surf_window);
             HDC tmpdc2 = CreateCompatibleDC(HDC_SCREEN);
@@ -416,10 +423,12 @@ namespace agg
     {
         if(idx < max_images) 
         {
+#ifndef _MG_MINIMALGDI
             if(m_specific->m_surf_img[idx]) 
                 UnloadBitmap(m_specific->m_surf_img[idx]);
             else
                 m_specific->m_surf_img[idx] = (PBITMAP)calloc(1, sizeof(BITMAP)); 
+#endif
 
 #if 0
             if (LoadBitmapFromMem(m_specific->m_surf_window, 
@@ -471,6 +480,7 @@ namespace agg
     {
         if(idx < max_images) {
 
+#ifndef _MG_MINIMALGDI
             if(m_specific->m_surf_img[idx]) 
                 UnloadBitmap(m_specific->m_surf_img[idx]);
             else
@@ -479,6 +489,7 @@ namespace agg
             if (LoadBitmapFromFile(m_specific->m_surf_window, 
                         m_specific->m_surf_img[idx], file) != 0)
                 return false;
+#endif
 #if 0
             FillBoxWithBitmap(m_specific->m_surf_window, 0, 0, 0, 0, 
                     m_specific->m_surf_img[idx]);
@@ -534,13 +545,19 @@ namespace agg
     //------------------------------------------------------------------------
     void platform_support::start_timer()
     {
+#ifndef _MG_MINIMALGDI
         m_specific->m_sw_start = GetTickCount();
+#endif
     }
 
     //------------------------------------------------------------------------
     double platform_support::elapsed_time() const
     {
+#ifndef _MG_MINIMALGDI
         int stop = GetTickCount();
+#else
+        int stop = 0;
+#endif
         return double(stop - m_specific->m_sw_start);
     }
 
@@ -573,11 +590,3 @@ namespace agg
     void platform_support::on_draw() {}
     void platform_support::on_post_draw(void* raw_handler) {}
 }
-#if 0
-int agg_main(int argc, char* argv[]);
-int main(int argc, char* argv[])
-{
-    return agg_main(argc, argv);
-    //return MiniGUIMain(argc, argv);
-}
-#endif

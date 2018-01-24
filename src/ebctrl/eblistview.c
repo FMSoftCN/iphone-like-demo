@@ -95,8 +95,6 @@ static int isInListViewHead (int mouseX, int mouseY, PEBLSTHDR * pRet,
 static void sDrawTextToSubItem (HWND hwnd,HDC hdc, PEBSUBITEMDATA psubitem, int nRows,
                                 int nCols, PEBITEMDATA pItem,
                                 PEBLSTVWDATA pLVInternalData);
-static void sDrawText (HDC hdc, int x, int y, int width, int height,
-                       const char *pszText);
 static int sSortItemByCol (unsigned int nCols, SORTTYPE sort,
                            PEBLSTVWDATA pLVInternalData);
 
@@ -106,7 +104,6 @@ static int sGetSubItemWidth (int nCols, PEBLSTVWDATA pLVInternalData);
 static int sGetSubItemX (int nCols, PEBLSTVWDATA pLVInternalData);
 static int sAddOffsetToTailSubItem (int nCols, int offset,
                                     PEBLSTVWDATA pLVInternalData);
-static int sAddOffsetToSubItem (PEBLSTHDR p, int offset);
 static int setItemColor (int color, int rows, PEBLSTVWDATA plvinternaldata);
 
 
@@ -1040,11 +1037,14 @@ static int sGetFrontSubItemsWidth (int end, PEBLSTVWDATA pLVInternalData)
 	return width;
 }
 
+#if 0
+static int sAddOffsetToSubItem (PEBLSTHDR p, int offset);
 static int sAddOffsetToSubItem (PEBLSTHDR p, int offset)
 {
 	p->width += offset;
 	return 0;
 }
+#endif
 
 static int sAddOffsetToTailSubItem (int nCols, int offset, PEBLSTVWDATA pLVInternalData)
 {
@@ -1333,6 +1333,7 @@ static int isInLVItem (int mouseX, int mouseY, PEBITEMDATA * pRet, PEBLSTVWDATA 
 	return ret;
 }
 
+#if 0
 static void sDrawText (HDC hdc, int x, int y, int width, int height, const char *pszText)
 {
 	RECT rect;
@@ -1357,6 +1358,7 @@ static void sDrawText (HDC hdc, int x, int y, int width, int height, const char 
 		}
 	}
 }
+#endif
 
 static void
 sDrawTextToSubItem (HWND hwnd,HDC hdc, PEBSUBITEMDATA psubitem,int nRows, int nCols,
@@ -1435,7 +1437,7 @@ sDrawTextToSubItem (HWND hwnd,HDC hdc, PEBSUBITEMDATA psubitem,int nRows, int nC
 
                 if(psubitem->iImage)
                 {
-                    char * tmpfile,*str1;        		  	
+                    char * tmpfile;        		  	
                     tmpfile = (char *)(psubitem->iImage);
 
                     if (dwStyle & ELVS_TYPE2STATE)//2// 2?
@@ -1922,10 +1924,9 @@ int lvGetRowsChecked(HWND hWnd, int iRows)
 	return 0;
 }
 
-static lvFillRectWithBitmap(HDC hdc,RECT * rect,PBITMAP pbmp)
+static void lvFillRectWithBitmap(HDC hdc,RECT * rect,PBITMAP pbmp)
 {
 	int x,y;
-	int xend=0,yend=0;
 	if(RECTW((*rect)) < pbmp->bmWidth || RECTH((*rect)) < pbmp->bmHeight)
 	{
 		FillBoxWithBitmap(hdc,0,
@@ -1960,8 +1961,6 @@ static void lvDrawBKBitmap(HWND hwnd,HDC hdc,PBITMAP pbmp)
 {
   RECT rcClient;
   DWORD dwStyle = GetWindowStyle (hwnd);
-  
-  PEBLSTVWDATA pLVInternalData = (PEBLSTVWDATA) GetWindowAdditionalData2 (hwnd);
   
   if(!pbmp)
   	return;
@@ -2170,8 +2169,6 @@ static void  lvStatusChangeProcess(HWND hwnd, HDC hdc, int itemnum1, int itemnum
 	PEBSUBITEMDATA p2 = NULL;
 	PEBITEMDATA p3 = NULL;
 	int i, j;
-	int nOldBkColor, nOldBrushColor;
-	int temp;
 	unsigned char red,green,blue,alpha;
 	BITMAP bmp[3],*pbmp[3];
 	BITMAP twobmp[2],*ptwobmp[2];//add by tjb
@@ -2272,7 +2269,7 @@ static void  lvStatusChangeProcess(HWND hwnd, HDC hdc, int itemnum1, int itemnum
   			{
 //edit by tjb 2004-3-11
 //修改原因:若不是ELVS_TYPE3STATE,则没有获得焦点一态
-				char * twotmpfile,*twostr1;  
+				char * twotmpfile;  
 	  			char twobmpfile1[MAX_PATH+1],twobmpfile2[MAX_PATH+1];
 				
 	    		twotmpfile = (char *)(pLVInternalData->nItemBKImage);
@@ -2486,8 +2483,6 @@ static void lvOnDraw (HWND hwnd, HDC hdc)
 	PEBSUBITEMDATA p2 = NULL;
 	PEBITEMDATA p3 = NULL;
 	int i, j;
-	int nOldBkColor, nOldBrushColor;
-	int temp;
 	BITMAP bmp[3],*pbmp[3];
 	BITMAP twobmp[2],*ptwobmp[2];//add by tjb
 	DWORD pbitmap = 0;
@@ -2588,7 +2583,7 @@ static void lvOnDraw (HWND hwnd, HDC hdc)
   			{
 //edit by tjb 2004-3-11
 //修改原因:若不是ELVS_TYPE3STATE,则没有获得焦点一态
-				char * twotmpfile,*twostr1;  
+				char * twotmpfile;  
 	  			char twobmpfile1[MAX_PATH+1],twobmpfile2[MAX_PATH+1];
 				
 	    		twotmpfile = (char *)(pLVInternalData->nItemBKImage);
@@ -2832,7 +2827,7 @@ void lvNotifyParentPos(HWND hWnd)
 }
 
 /********************************************** List Report	    **********************************************/
-static int sListViewProc (HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
+static LRESULT sListViewProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	PEBLSTVWDATA pLVInternalData;
   	DWORD dwStyle = GetWindowStyle (hwnd);
@@ -2915,8 +2910,6 @@ static int sListViewProc (HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
 //原因:当鼠标移动到控件外后，仍有行获得焦点，应清掉所以焦点	
 	case MSG_NCMOUSEMOVE:
 	{
-		RECT rcClient, rect;
-		
 		if(wParam == HT_OUT)			
 		{		
 			if (pLVInternalData->pItemMouseOver != NULL)
@@ -2947,7 +2940,7 @@ static int sListViewProc (HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
         int mouseY = HISWORD (lParam);  
         int nRows,oldfocus;
         HDC   hdc;
-        RECT rect, rcClient;
+        RECT /*rect,*/ rcClient;
         PEBITEMDATA p2;
 
         GetClientRect (hwnd, &rcClient);
@@ -3182,7 +3175,7 @@ static int sListViewProc (HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
 	
     case MSG_LBUTTONUP:
     {
-        RECT rect;
+        //RECT rect;
         PEBLSTHDR p1;
    
         if (!pLVInternalData->bBorderDraged)
@@ -3191,10 +3184,10 @@ static int sListViewProc (HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
             if (pLVInternalData->bItemClicked)
             {
                 p1->up = TRUE;
-                rect.left = p1->x;
-                rect.top = p1->y;
-                rect.right = p1->x + p1->width;
-                rect.left = p1->y + p1->height;
+                //rect.left = p1->x;
+                //rect.top = p1->y;
+                //rect.right = p1->x + p1->width;
+                //rect.left = p1->y + p1->height;
                 InvalidateRect (hwnd, NULL, FALSE);
                 pLVInternalData->bItemClicked = FALSE;
               }
@@ -3408,8 +3401,7 @@ static int sListViewProc (HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
     }
     case ELVM_SETMOUSEOVER_OFFSET:
     {
-    	int p,oldfocus;
-    	HDC   hdc;
+    	int p;
     	int p2 =(int)lParam;
     	
     	if(pLVInternalData->nRows <=0 || p2 <0)
@@ -3475,7 +3467,6 @@ static int sListViewProc (HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
         RECT rect;
         int scrollBoundMax;
         int scrollBoundMin;
-        int scrollNewPos;
         int p ;
   
   		p = (WPARAM)lParam ;
@@ -4106,8 +4097,7 @@ static int sListViewProc (HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
  		break;
  		case SCANCODE_CURSORBLOCKDOWN:
  		{
- 			int p,oldfocus;
-			HDC   hdc;
+ 			int p;
 			POINT  *action =NULL;
 			
 			action =(POINT *)lParam;
@@ -4144,8 +4134,7 @@ static int sListViewProc (HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
  		break;
  		case SCANCODE_CURSORBLOCKUP:
  		{
- 			int p,oldfocus;
-			HDC   hdc;
+ 			int p;
 			POINT  *action =NULL;
 			
 			action =(POINT *)lParam;			
@@ -4189,8 +4178,7 @@ static int sListViewProc (HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
  		break;
  		case SCANCODE_PAGEUP:
 		{
-			int p,oldfocus;
-			HDC   hdc;
+			int p;
 			POINT  *action =NULL;
 			
 			action =(POINT *)lParam;
@@ -4231,8 +4219,7 @@ static int sListViewProc (HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
  		}
   		case SCANCODE_PAGEDOWN:
 		{
-			int p,oldfocus;
-			HDC   hdc;
+			int p;
 			POINT  *action =NULL;
 			
 			action =(POINT *)lParam;
@@ -4333,8 +4320,7 @@ static int sListViewProc (HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
  		break;
  		case SCANCODE_CURSORBLOCKDOWN:
  		{
- 			int p,oldfocus;
-			HDC   hdc;
+ 			int p;
 			//POINT  *action =NULL;			
 			//action =(POINT *)lParam;
  			if(pLVInternalData->nItemMouseOver >=0 && 
@@ -4395,8 +4381,7 @@ static int sListViewProc (HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
  		break;
  		case SCANCODE_CURSORBLOCKUP:
  		{
- 			int p,oldfocus;
-			HDC   hdc;
+ 			int p;
 			//POINT  *action =NULL;
 			
 			//action =(POINT *)lParam;			
@@ -4463,8 +4448,7 @@ static int sListViewProc (HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
  		break;
  		case SCANCODE_PAGEUP:
 		{
-			int p,oldfocus;
-			HDC   hdc;
+			int p;
 			//POINT  *action =NULL;
 			
 			//action =(POINT *)lParam;
@@ -4528,8 +4512,7 @@ static int sListViewProc (HWND hwnd, int message, WPARAM wParam, LPARAM lParam)
  		}
   		case SCANCODE_PAGEDOWN:
 		{
-			int p,oldfocus;
-			HDC   hdc;
+			int p;
 			//POINT  *action =NULL;
 			
 			//action =(POINT *)lParam;

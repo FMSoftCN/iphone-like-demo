@@ -1,7 +1,9 @@
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
+#include <pthread.h>
+
 #include "p-code.h"
 #include "animate.h"
 
@@ -10,7 +12,7 @@ typedef struct _tl_step_t{
 	struct _tl_step_t *next;
 	int type:16;
 	int frame_left:16;
-	ANIMATE* obj;
+    ANIMATE* obj;
 }tl_step_t;
 
 #define STEP_HEAD  struct _tl_step_t *next; \
@@ -35,6 +37,12 @@ typedef struct _tl_alpha_step_t{
 	int stepa;
 }tl_alpha_step_t;
 	
+typedef struct _tl_userself_step_t{
+	STEP_HEAD
+    int frame_index;
+	void* context;
+    CALC_ANIMATE calc_animate;
+}tl_userself_step_t;
 
 //define the timeline expend instructons
 enum tlInstruction{
@@ -104,7 +112,7 @@ enum tlInstruction{
 #define AppendIns(pm,ins) AppendValue(pm,"c", ins)
 
 //define the timeline struction implemention
-static int tlSetLocation(unsigned char* ins, unsigned int** stack,  void *param)
+static int tlSetLocation(unsigned char* ins, intptr_t** stack,  void *param)
 {
 	int x_value;
 	int y_value;
@@ -119,7 +127,7 @@ static int tlSetLocation(unsigned char* ins, unsigned int** stack,  void *param)
 	return 1;
 }
 
-static int tlSetSize(unsigned char* ins, unsigned int** stack, void *param)
+static int tlSetSize(unsigned char* ins, intptr_t** stack, void *param)
 {
 	int h_value;
 	int w_value;
@@ -134,7 +142,7 @@ static int tlSetSize(unsigned char* ins, unsigned int** stack, void *param)
 	return 1;
 }
 
-static int tlSetVisible(unsigned char* ins, unsigned int ** stack, void* param)
+static int tlSetVisible(unsigned char* ins, intptr_t** stack, void* param)
 {
 	int v_value;
 	ANIMATE* obj;
@@ -146,7 +154,7 @@ static int tlSetVisible(unsigned char* ins, unsigned int ** stack, void* param)
 	return 1;
 }
 
-static int tlSetImage(unsigned char* ins, unsigned int ** stack, void* param)
+static int tlSetImage(unsigned char* ins, intptr_t** stack, void* param)
 {
 	void* img;
 	ANIMATE* obj;
@@ -158,7 +166,7 @@ static int tlSetImage(unsigned char* ins, unsigned int ** stack, void* param)
 	return 1;
 }
 
-static int tlSetAlpha(unsigned char* ins, unsigned int ** stack, void* param)
+static int tlSetAlpha(unsigned char* ins, intptr_t** stack, void* param)
 {
 	ANIMATE* obj;
 	int alpha;
@@ -191,7 +199,7 @@ static tl_step_t * get_or_new_step(TIME_LINE* tl, ANIMATE* a, int type, int size
 #define GET_NEW_STEP(tl_step_type, tl, a, type) \
 	(tl_step_type*) get_or_new_step(tl, a, type, sizeof(tl_step_type))
 
-static int tlMoveTo(unsigned char* ins, unsigned int** stack, void *param)
+static int tlMoveTo(unsigned char* ins, intptr_t** stack, void *param)
 {
 	TIME_LINE* tl = (TIME_LINE*)param;
 	int x1, y1, frame_num;
@@ -215,7 +223,7 @@ static int tlMoveTo(unsigned char* ins, unsigned int** stack, void *param)
 	return 1;
 }
 
-static int tlScaleTo(unsigned char* ins, unsigned int** stack,  void *param)
+static int tlScaleTo(unsigned char* ins, intptr_t** stack,  void *param)
 {
 	TIME_LINE* tl = (TIME_LINE*)param;
 	int w1, h1, frame_num;
@@ -239,7 +247,7 @@ static int tlScaleTo(unsigned char* ins, unsigned int** stack,  void *param)
 	return 1;
 }
 
-static int tlAlphaTo(unsigned char* ins, unsigned int** stack, void *param)
+static int tlAlphaTo(unsigned char* ins, intptr_t** stack, void *param)
 {
 	TIME_LINE* tl = (TIME_LINE*)param;
 	int a1, frame_num;
@@ -262,7 +270,33 @@ static int tlAlphaTo(unsigned char* ins, unsigned int** stack, void *param)
 	return 1;
 }
 
-static int tlRun(unsigned char* ip, unsigned int** stack, void* param)
+static int tlUserSelfTo(unsigned char* ins, intptr_t** stack, void *param)
+{
+	TIME_LINE* tl = (TIME_LINE*)param;
+	intptr_t context;
+    int frame_num;
+	ANIMATE* obj;
+	tl_userself_step_t *tms;
+    CALC_ANIMATE calc_animate;
+
+    calc_animate = (CALC_ANIMATE)POP(*stack);
+	frame_num = POP(*stack);
+	context = POP(*stack);
+	obj = (ANIMATE*)POP(*stack);
+
+	tms = GET_NEW_STEP(tl_userself_step_t, tl, obj, tlstUserSelf);
+	
+	if(frame_num <= 0)
+		frame_num = 1;
+	//set tms
+	tms->frame_left = frame_num;
+	tms->context    = (void*)context;
+	tms->calc_animate = (CALC_ANIMATE)calc_animate;
+	
+	return 1;
+}
+
+static int tlRun(unsigned char* ip, intptr_t** stack, void* param)
 {
 	TIME_LINE* tl = (TIME_LINE*)param;
 	
@@ -271,7 +305,7 @@ static int tlRun(unsigned char* ip, unsigned int** stack, void* param)
 	return 1;
 }
 
-static int tlWait(unsigned char* ip, unsigned int** stack,void* param)
+static int tlWait(unsigned char* ip, intptr_t** stack,void* param)
 {
 	TIME_LINE* tl = (TIME_LINE*)param;
 	
@@ -280,7 +314,7 @@ static int tlWait(unsigned char* ip, unsigned int** stack,void* param)
 	return 1;
 }
 
-static int tlLoop(unsigned char* ip, unsigned int** stack, void* param)
+static int tlLoop(unsigned char* ip, intptr_t** stack, void* param)
 {
 	TIME_LINE* tl = (TIME_LINE*)param;
 	
@@ -368,7 +402,15 @@ static void tl_calculate_steplist(TIME_LINE* tl)
 			//printf("--:%d: tl=%p, Alpha=%d, step=%d\n", tl, ts->obj, ts->obj->alpha, tms->stepa);
 			break;
 		}
+        case tlstUserSelf:
+        {
+			tl_userself_step_t* tms = (tl_userself_step_t*)ts;
+			// here do the step
+			tms->calc_animate(tms->obj, tms->frame_index, tms->context);
+            tms->frame_index ++;
+			break;
 		}
+        }
 		ts->frame_left --;
 		if(ts->frame_left <= 0)
 		{
@@ -489,7 +531,7 @@ BOOL StartTimeLine(ANIMATE_SENCE* as, TIME_LINE* tl, PCODE_METHOD* method, int s
 		return FALSE;
 
 	if(method == NULL) {
-		tl->env == NULL;
+		tl->env = NULL;
 		tl->mode = tlmRun;
 	}
 	else {
@@ -559,6 +601,7 @@ BOOL ContinueTimeLine(ANIMATE_SENCE* as, TIME_LINE* tl)
 	AS_LOCK(as);
 	tl->state = tlsRun;
 	AS_UNLOCK(as);
+    return TRUE;
 }
 
 TIME_LINE * GetTimeLineByID(ANIMATE_SENCE* as, int id)
@@ -596,58 +639,74 @@ PCODE_METHOD* GetTimeLineMethod(const char* strName)
 //directly call
 void TLMoveTo(TIME_LINE* tl, ANIMATE* a, int x1, int y1, int frame_num)
 {
-	unsigned int _stack [] ={
-		(unsigned int)a,
-		(unsigned int)x1,
-		(unsigned int)y1,
-		(unsigned int)frame_num
+	intptr_t _stack [] ={
+		(intptr_t)a,
+		(intptr_t)x1,
+		(intptr_t)y1,
+		(intptr_t)frame_num
 	};
-	unsigned int *stack = _stack + sizeof(_stack)/sizeof(int);
+	intptr_t *stack = _stack + sizeof(_stack)/sizeof(intptr_t);
 
 	tlMoveTo(NULL, &stack, tl);
 }
 
 void TLScaleTo(TIME_LINE* tl, ANIMATE* a, int w1, int h1, int frame_num)
 {
-	unsigned int _stack [] ={
-		(unsigned int)a,
-		(unsigned int)w1,
-		(unsigned int)h1,
-		(unsigned int)frame_num
+	intptr_t _stack [] ={
+		(intptr_t)a,
+		(intptr_t)w1,
+		(intptr_t)h1,
+		(intptr_t)frame_num
 	};
-	unsigned int *stack = _stack + sizeof(_stack)/sizeof(int);
+	intptr_t *stack = _stack + sizeof(_stack)/sizeof(intptr_t);
 
 	tlScaleTo(NULL, &stack, tl);
 
 }
+
 void TLAlphaTo(TIME_LINE* tl, ANIMATE* a, int a1,int frame_num)
 {
-	unsigned int _stack [] ={
-		(unsigned int)a,
-		(unsigned int)a1,
-		(unsigned int)frame_num
+	intptr_t _stack [] ={
+		(intptr_t)a,
+		(intptr_t)a1,
+		(intptr_t)frame_num
 	};
-	unsigned int *stack = _stack + sizeof(_stack)/sizeof(int);
+	intptr_t *stack = _stack + sizeof(_stack)/sizeof(intptr_t);
 
 	tlAlphaTo(NULL, &stack, tl);
 
 }
 
+void TLUserSelfTo(TIME_LINE* tl, ANIMATE* a, CALC_ANIMATE calc_animate, 
+        void* context, int frame_num)
+{
+	intptr_t _stack [] ={
+		(intptr_t)a,
+		(intptr_t)context,
+		(intptr_t)frame_num,
+		(intptr_t)calc_animate
+	};
+	intptr_t *stack = _stack + sizeof(_stack)/sizeof(intptr_t);
+
+	tlUserSelfTo(NULL, &stack, tl);
+
+}
+
 void TLRun(TIME_LINE* tl, int frame_num)
 {
-	unsigned int _stack[] = {
-		(unsigned int)frame_num
+	intptr_t _stack[] = {
+		(intptr_t)frame_num
 	};
-	unsigned int *stack = _stack + sizeof(_stack)/sizeof(int);
+	intptr_t *stack = _stack + sizeof(_stack)/sizeof(intptr_t);
 	tlRun(NULL,&stack,tl);
 }
 
 void TLWait(TIME_LINE* tl, int frame_num)
 {
-	unsigned int _stack[] = {
-		(unsigned int)frame_num
+	intptr_t _stack[] = {
+		(intptr_t)frame_num
 	};
-	unsigned int *stack = _stack + sizeof(_stack)/sizeof(int);
+	intptr_t *stack = _stack + sizeof(_stack)/sizeof(intptr_t);
 	tlWait(NULL,&stack,tl);
 }
 
@@ -721,3 +780,4 @@ void TLStopAnimateStep(TIME_LINE* tl, ANIMATE* a, int type,BOOL finish_animate)
 	}
 
 }
+
